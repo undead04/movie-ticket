@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "CommonJS",
+
+    "outDir": "./dist",              // Chuyển các file đã biên dịch vào thư mục dist
+    "rootDir": "./src",              // Chỉ định thư mục nguồn
+    "esModuleInterop": true,
+    "experimentalDecorators": true,  // Bật decorators
+    "emitDecoratorMetadata": true    // Bật metadata cho decorators
+  },
+  "include": ["src/**/*"],            // Chỉ bao gồm các file trong thư mục src
+  "exclude": ["node_modules"]
+}
