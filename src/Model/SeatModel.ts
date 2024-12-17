@@ -1,6 +1,9 @@
 import {  IsInt, IsNotEmpty, IsString } from "class-validator";
 import { Exists } from "../validations/ExitsValidator";
 import { Screen } from "../Data/Screen";
+import { IsUnique } from "../validations/UniqueValidator";
+import { Seat } from "../Data/Seat";
+import { MaxValue } from "../validations/MaxValueValidator";
 
 export interface ISeatModel{
     row:number,
@@ -11,17 +14,19 @@ export interface ISeatModel{
 
 export class SeatModel{
     
-    @IsNotEmpty({message:"Row không được trống"})
-    @IsInt({message:"Row phải là số"})
+    @IsNotEmpty({message:"Vị trí hàng ngang không được trống"})
+    @IsInt({message:"Vị trí hàng ngang phải là số phải là số"})
+    @MaxValue(0,10)
     row:number;
 
-    @IsNotEmpty({message:"col không được trống"})
-    @IsInt({message:"col phải là số"})
-    
+    @IsNotEmpty({message:"Vị trí cột không được trống"})
+    @IsInt({message:"vị trí cột phải là số"})
+    @MaxValue(0,10)
     col:number;
 
     @IsNotEmpty({message:"seatNumber không được trống"})
     @IsString({message:"seatNumber phải là string"})
+    @IsUnique(Seat,'seatNumber','id',{column:"screen",field:"screenId"},{message:"Tên ghế này trong phòng đã có"})
     seatNumber:string
 
     @IsInt({message:"Phải là số"})

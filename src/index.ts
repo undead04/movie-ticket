@@ -15,7 +15,7 @@ import reviewRoute from './Routes/ReviewRoute'
 import authRoute from './Routes/AuthRoute'
 import paymentRoute from './Routes/PaymentRoute'
 import billRoute from './Routes/BillRoute'
-
+import ticketRoute from './Routes/TicketRoute'
 // Load environment variables from .env file
 dotenv.config();
 // set up cookies
@@ -47,6 +47,7 @@ app.use("/api",authRoute)
 app.use("/api/payment",paymentRoute)
 app.use('/api/bill',billRoute)
 app.use('/api/groupRole',groupRoleRoute)
+app.use('/api/ticket',ticketRoute)
 // Bắt đầu server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

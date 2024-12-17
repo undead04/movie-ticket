@@ -8,6 +8,7 @@ import dataController from "./DataController";
 import { IDataDeleteModel } from "../Model/dataModel";
 import dataSource from "../DataSource";
 import AppRole from "../Model/GroupRoleModel";
+import { Ticket } from "../Data/Ticket";
 
 const getAllWithFilterAndPagination=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
     try{
@@ -61,6 +62,7 @@ const remove=async(req:AuthRequest,res:Response,next:NextFunction):Promise<void>
        if(await dataController.IsNotFound(res,data,"Không tìm thấy bình luận này")) return;
        if(role==AppRole.User&&data.user.id!=userId){
          res.status(403).json(RepositoryDTO.Error(403,"Bạn không đủ quyền hạn để xóa bình luận này"))
+         return
        }
         await dataService.remove(Review,data)
         res.status(200).json(RepositoryDTO.Success("Xóa bình luận thành công"))
@@ -77,6 +79,13 @@ const create=async(req:AuthRequest,res:Response,next:NextFunction):Promise<void>
         const model:IReviewModel=req.body;
         const validateError = new ReviewModel(model);
         const userId:number=req._id
+        const ticket=await (await dataService.getBuilderQuery(Ticket,'ticket')).
+            innerJoin('ticket.showtime','showtime')
+            .andWhere('showtime.movieId=:value',{value:model.movieId}).getOne()
+        if(!ticket){
+            res.status(403).json(RepositoryDTO.Error(403,"Bạn không có đủ điều kiện để bình luận phim chiếu rạp này"))
+            return
+        }
         if(await dataController.validateError(res,validateError)) return;
          await dataService.create(Review,{
             ...model,

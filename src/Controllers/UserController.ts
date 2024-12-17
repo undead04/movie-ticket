@@ -68,9 +68,9 @@ const remove=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
     }
 
 }
-const update=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
+const update=async(req:AuthRequest,res:Response,next:NextFunction):Promise<void>=>{
     try{
-        const id=Number(req.params.id);
+        const id=req._id
         const model:IUserUpdateModel=req.body;
         const record=await dataService.getBy(User,"user",id);
         if(await dataController.IsNotFound(res,record,"Không tìm thấy người dùng  này")) return
@@ -100,7 +100,7 @@ const updatePassword= async (req:AuthRequest,res:Response,next:NextFunction):Pro
             res.status(400).json(RepositoryDTO.Error(400,"Mật khẩu mới trùng với mật khẩu củ"))
             return
         }
-        if(model.newPassword!=model.comfirmPassword){
+        if(model.newPassword!=model.confirmPassword){
             res.status(400).json(RepositoryDTO.Error(400,"Mật khẩu xác nhận không trùng với mật khẩu mới"))
             return
         }

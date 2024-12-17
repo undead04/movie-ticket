@@ -7,7 +7,6 @@ export class ExistsValidator implements ValidatorConstraintInterface {
 
   async validate(value: any, args: ValidationArguments): Promise<boolean> {
     const [entity, idFiled] = args.constraints;
-    console.log(entity)
      // Nếu value là mảng, kiểm tra từng phần tử
      if (Array.isArray(value)) {
       const repository = dataSource.getRepository(entity);

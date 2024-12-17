@@ -33,7 +33,7 @@ const login=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
             sameSite: 'strict', // Giảm thiểu CSRF
             maxAge: 3*60 * 60 * 1000 // 1 giờ
         }); 
-        res.status(200).json(RepositoryDTO.Success("Đăng nhập thành công"))
+        res.status(200).json(RepositoryDTO.WithData(200,userData))
     }catch(error:any){
         console.log(error)
         res.status(500).json(error)

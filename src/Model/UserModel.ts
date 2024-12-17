@@ -15,7 +15,7 @@ export interface IUserUpdateModel{
 export interface IPasswordModel{
     oldPassword:string,
     newPassword:string,
-    comfirmPassword:string
+    confirmPassword:string
 }
 export class UserModel{
     @IsString()

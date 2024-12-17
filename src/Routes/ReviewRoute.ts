@@ -10,5 +10,5 @@ router.get("/:id",reviewController.get)
 router.post("/",authenticateToken,reviewController.create)
 router.put("/:id",authenticateToken,reviewController.update)
 router.delete("/:id",authenticateToken,reviewController.remove)
-router.delete('/',reviewController.removeArray)
+router.delete('/',authenticateToken,reviewController.removeArray)
 export default router;

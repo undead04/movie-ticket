@@ -18,6 +18,7 @@ export class MovieModel{
    @IsString({message:"Tên phim phải là một chuổi văn bản"})
    @IsNotEmpty({message:"Tên phim không được trống"})
    @IsUnique(Movie,"title",'id',{message:'Tên phim không được trùng lặp'})
+   
    title!:string;
 
    @IsString({message:"Mô tả phải là một chuổi văn bản"})

@@ -13,7 +13,7 @@ export class TheaterModel{
     
     @IsString({message:"Tên rap chiếu phim phải là một chuổi văn bản"})
     @IsNotEmpty({message:"Tên rap chiếu phim không được trống"})
-    @IsUnique(Theater,"name",'id',{message:'Tên rap chiếu phim không được trùng lặp'})
+    @IsUnique(Theater,"name",'id',null,{message:'Tên rap chiếu phim không được trùng lặp'})
     name!:string;
 
     @IsString({message:"Địa chỉ phải là một chuổi văn bản"})

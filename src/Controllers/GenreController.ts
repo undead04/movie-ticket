@@ -6,6 +6,7 @@ import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
 import dataController from "./DataController";
 import {  IDataDeleteModel } from "../Model/dataModel";
 import dataSource from "../DataSource";
+import { IsDuplicatesWithSort } from "../utils/GenerationCode";
 
 const getAllWithFilterAndPagination=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
     try{
@@ -62,7 +63,7 @@ const remove=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
        const record=await dataService.getBy(Genre,"genre",id);
        if(await dataController.IsNotFound(res,record,"Không tìm thấy thể loại phim này"))return
        await dataService.remove(Genre,record)
-       res.status(200).json(RepositoryDTO.Success("Xóa thể loại phim thành công"))
+       res.status(200).json(RepositoryDTO.Success("Xóa các thể loại phim thành công"))
     }catch(error:any){
         console.log(error)
         res.status(500).json(error)
@@ -74,6 +75,11 @@ const createArray=async(req:Request,res:Response,next:NextFunction):Promise<void
       
         // Tạo đối tượng từ request body
         const models:IGenreModel[]=req.body;
+        const arrayName=models.map(model=>model.name.trim().toLowerCase())
+        if(IsDuplicatesWithSort(arrayName)){
+            res.status(400).json(RepositoryDTO.Error(400,`Tạo thể loại thất bại vì có model trùng tên`))
+            return
+        }
         for (const model of models) {
             const validateError = new GenreModel(0, model);  // Tạo đối tượng kiểm tra lỗi từ model
             if (await dataController.validateError<GenreModel>(res, validateError)) return
@@ -81,7 +87,7 @@ const createArray=async(req:Request,res:Response,next:NextFunction):Promise<void
          await dataSource.manager.transaction(async(transactionEntityManger)=>{
             await dataService.createArray(Genre,models,transactionEntityManger)
          })
-         res.status(200).json("Tạo thể loại phim thành công")
+         res.status(200).json(RepositoryDTO.Success("Tạo thể loại phim thành công"))
     }catch(error:any){
         console.log(error)
         res.status(500).json(error)

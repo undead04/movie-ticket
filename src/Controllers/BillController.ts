@@ -53,7 +53,7 @@ const get=async(req:Request,res:Response,next:NextFunction):Promise<void> =>{
         const data=await dataService.getBy(Bill,'bill',id,"id",[
             {
                 original:"bill.user",link:'user'
-            }
+            },{original:'bill.ticket',link:"ticket"}
         ]);
         if(await dataController.IsNotFound(res,data,"Không tìm thấy hóa đơn này")) return
         res.status(200).json(RepositoryDTO.WithData(200,data))

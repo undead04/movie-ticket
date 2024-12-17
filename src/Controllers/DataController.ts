@@ -2,6 +2,7 @@ import {  Response } from 'express';
 import { ObjectLiteral, ReturningStatementNotSupportedError } from 'typeorm';
 import { RepositoryDTO } from '../Model/DTO/RepositoryDTO';
 import { validate } from 'class-validator';
+import { error } from 'console';
 
 export const IsNotFound = async <T extends ObjectLiteral>(
     res: Response,
@@ -33,13 +34,11 @@ export const validateError= async<T extends object>(
 ):Promise<boolean>=>{
     const errors=await validate(validateError);
     if (errors.length > 0) {
-        res.status(400).json({
-          message: 'Validation failed',
-          errors: errors.map(error => ({
-            property: error.property,
-            constraints: error.constraints,
-          })),
-        });
+        
+      res.status(400).json(RepositoryDTO.Error(400,errors.reduce((acc,error)=>{
+        acc[error.property]=Object.values(error.constraints)[0]
+        return acc
+      },{})));
         return true
       }
     return false

@@ -6,16 +6,15 @@ import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
 import dataController from "./DataController";
 import { IDataDeleteModel } from "../Model/dataModel";
 import dataSource from "../DataSource";
-import { Movie } from "../Data/Movie";
-
 const getAllWithFilterAndPagination = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { movieId, showDate, page, pageSize } = req.query;
+        const { movieId, showDate, page, pageSize,orderBy,sort } = req.query;
 
         // Chuyển đổi các tham số từ query string
         const pageNumber = Number(page) || 1;
         const pageSizeNumber = Number(pageSize) || 10;
-
+        const orderByField=orderBy as string;
+        const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";
         // Xử lý showDate, kiểm tra hợp lệ
         let showDateParsed: Date | null = null;
         if (showDate) {
@@ -42,7 +41,9 @@ const getAllWithFilterAndPagination = async (req: Request, res: Response, next: 
         if (showDateParsed) {
             queryBuilder = queryBuilder.andWhere('showtime.showDate = :showDate', { showDate: showDateParsed.toISOString().split('T')[0] });
         }
-
+        if(orderByField){
+            queryBuilder=queryBuilder.orderBy(`genre.${orderByField}`,sortOrder)
+        }
         // Nhóm kết quả theo movieId và chọn showtime
         const datas=await queryBuilder.select('movie.*',)
         .addSelect('GROUP_CONCAT(showtime.id)', 'showtimes')

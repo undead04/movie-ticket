@@ -6,13 +6,11 @@ import dataSource from "../DataSource";
 import dataService from "../Service/DataService";
 import { Bill } from "../Data/Bill";
 import { StatusOrder } from "../Model/BillModel";
-import { PaymentStatus } from "../Model/PaymentModel";
 import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
 
 const createPayment=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
     try{
         const model:IMomoModel=req.body;
-        console.log(model)
         const data= await createMoMoPayment(model)
         if(data.resultCode!=0){
             res.status(400).json(data.message)
