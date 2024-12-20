@@ -8,10 +8,10 @@ export class Screen {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({type:"text"})
   name!: string;
 
-  @Column()
+  @Column({type:"int",unsigned:true})
   seatCapacity!: number;
 
   @ManyToOne(() => Theater, (theater) => theater.screens, { onDelete: 'CASCADE' })

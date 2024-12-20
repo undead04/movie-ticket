@@ -6,13 +6,13 @@ export class Theater {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({type:"text", unique:true,length:50})
   name!: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text',length:50,unique:true })
   address!: string;
 
-  @Column()
+  @Column({type:"text"})
   city!: string;
 
   @CreateDateColumn()

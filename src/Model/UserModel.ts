@@ -1,5 +1,4 @@
 import { IsEmail, IsNotEmpty, IsString, MaxLength } from "class-validator";
-import { IsUnique } from "../validations/UniqueValidator";
 import { User } from "../Data/User";
 
 export interface IUserModel {
@@ -20,7 +19,6 @@ export interface IPasswordModel{
 export class UserModel{
     @IsString()
     @IsNotEmpty()
-    @IsUnique(User,"username",'id')
     username:string;
     @IsString()
     @IsNotEmpty()

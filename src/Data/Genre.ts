@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, Unique, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { MovieGenre } from './MovieGenre';
 
 @Entity()
@@ -16,4 +16,15 @@ export class Genre {
   movieGenre!:MovieGenre[]
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at!: Date;
+  @BeforeInsert()
+  async validateInsert(){
+    this.name.trim()
+    this.description.trim()
+  }
+  @BeforeUpdate()
+  async beforeUpdate(){
+    this.name.trim()
+    this.description.trim()
+    this.created_at=new Date()
+  }
 }

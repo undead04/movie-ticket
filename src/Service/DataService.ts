@@ -1,233 +1,175 @@
-import { EntityTarget, DeepPartial, ObjectLiteral, FindOptionsWhere, SelectQueryBuilder, DataSource, EntityManager } from 'typeorm';
-import dataSource from "../DataSource";
+import {
+  DeepPartial,
+  EntityManager,
+  EntityTarget,
+  ObjectLiteral,
+  Repository,
+  SelectQueryBuilder
+} from 'typeorm';
+import dataSource from '../DataSource'; // Assuming dataSource is configured correctly
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import CustomError from '../validations/CustumError';
 
-export interface IDataFilter{
-  columnFilter:string,
-  value:unknown,
-  operater:string,
+interface IRelationship {
+  original: string;
+  link: string;
 }
-export interface IRelationship{
-  original:string;
-  link:string
-}
-const getBuilderQuery = async <T extends ObjectLiteral>(
-  entity: EntityTarget<T>,
-  alias?:string
-) => {
-  const  repository=await getRepository(entity)
 
-  let queryBuilder = repository.createQueryBuilder(alias);
-  return queryBuilder
-};
-const getFilter = async <T extends ObjectLiteral>(
-  entity: EntityTarget<T>,
-  queryBuilder:SelectQueryBuilder<T>,
-  dataFilter:IDataFilter[],
-  alias?:string,
-) => {
-  queryBuilder = await getBuilderQuery(entity,alias)
-  dataFilter.forEach(data => {
-    if(data.operater=="IN"){
-      queryBuilder.andWhere(`${alias}.${data.columnFilter} ${data.operater} (:...${data.columnFilter})`,{[data.columnFilter]:data.value})
-    }else if(data.operater=="LIKE"){
-      queryBuilder.andWhere(`${alias}.${data.columnFilter} LIKE :${data.columnFilter})`,{[data.columnFilter]:`%${data.value}%`})
-    }else{
-      queryBuilder.andWhere(`${alias}.${data.columnFilter} ${data.operater}:${data.columnFilter})`,{[data.columnFilter]:data.value})
+interface IPagination<T> {
+  records: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+// Abstract base service
+export default  class DataService<T extends ObjectLiteral> {
+  protected alias: string;
+  protected entity: EntityTarget<T>;
+  constructor(entity:EntityTarget<T>,alias){
+    this.entity=entity;
+    this.alias=alias;
+  }
+
+  // Helper method to get the repository
+  protected getRepository(transactionalEntityManager?: EntityManager): Repository<T> {
+    return transactionalEntityManager
+      ? transactionalEntityManager.getRepository(this.entity)
+      : dataSource.getRepository(this.entity);
+  }
+
+  // Create a query builder
+  async createQueryBuilder(
+    transactionalEntityManager?: EntityManager
+  ): Promise<SelectQueryBuilder<T>> {
+    const repository = this.getRepository(transactionalEntityManager);
+    return repository.createQueryBuilder(this.alias);
+  }
+
+  // Pagination utility
+  async getPagination(
+    queryBuilder: SelectQueryBuilder<T>,
+    page: number = 1,
+    pageSize: number = 10
+  ): Promise<IPagination<T>> {
+    queryBuilder.skip((page - 1) * pageSize).take(pageSize);
+    const [records, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      records,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
+  }
+  async isNotFound(id:number,message:string,statusCode:number=404,field?:string){
+    const record = await this.getBy(id)
+    if(record==null){
+        throw new CustomError(message,statusCode,field)
+    }
+    return record    
+    }
+  // Fetch all records
+  async getAll(transactionalEntityManager?: EntityManager): Promise<T[]> {
+    const repository = this.getRepository(transactionalEntityManager);
+    return repository.find();
+  }
+
+  // Fetch a single record by a specific column
+  async getBy(
+    value: unknown,
+    columnField: string = 'id',
+    relations?: IRelationship[],
+    transactionalEntityManager?: EntityManager
+  ): Promise<T | null> {
+    const repository = this.getRepository(transactionalEntityManager);
+    const queryBuilder = repository.createQueryBuilder(this.alias);
+
+    if (relations) {
+      relations.forEach((relation) => {
+        queryBuilder.leftJoinAndSelect(relation.original, relation.link);
+      });
     }
 
-  });
-  return queryBuilder
-};
-const getRepository=async<T extends ObjectLiteral>(entity:EntityTarget<T>)=>{
-  const repository=dataSource.getRepository<T>(entity);
-  return repository
-}
-const getAllPagination = async function<T extends ObjectLiteral>(entity:EntityTarget<T>,data:SelectQueryBuilder<T>,page:number=1,pageSize:number=10) {
-   // Tính toán phân trang
-   data = data
-   .skip((page - 1) * pageSize)
-   .take(pageSize);
-
- // Lấy dữ liệu với filter và phân trang
- const [records, total] = await data.getManyAndCount();
-
- // Trả về dữ liệu và tổng số bản ghi để dễ dàng tính toán số trang
- return {
-   records,
-   total,
-   page,
-   pageSize,
-   totalPages: Math.ceil(total / pageSize),
- };
-}
-
-const createArray = async <T extends ObjectLiteral>(
-  entity: EntityTarget<T>, 
-  datas: QueryDeepPartialEntity<T>[], 
-  transactionalEntityManager: EntityManager
-): Promise<void> => {
-  if (datas.length === 0) {
-    console.warn('No data to insert');
-    return;
+    queryBuilder.where(`${this.alias}.${columnField} = :value`, { value });
+    return queryBuilder.getOne();
   }
-  try {
+
+  // Fetch records by an array of values
+  async getByArray(
+    values: unknown[],
+    columnField: string = 'id',
+    transactionalEntityManager?: EntityManager
+  ): Promise<T[]> {
+    if (!values.length) return [];
+    const queryBuilder = await this.createQueryBuilder(transactionalEntityManager);
+    queryBuilder.where(`${this.alias}.${columnField} IN (:...values)`, { values });
+    return queryBuilder.getMany();
+  }
+
+  // Create a single record
+  async create(
+    data: DeepPartial<T>,
+    transactionalEntityManager?: EntityManager
+  ): Promise<T> {
+    const repository = this.getRepository(transactionalEntityManager);
+    const newRecord = repository.create(data);
+    return repository.save(newRecord);
+  }
+
+  // Create multiple records
+  async createArray(
+    data: DeepPartial<T>[],
+    transactionalEntityManager?: EntityManager
+  ): Promise<void> {
+    if (!data.length) return;
     await transactionalEntityManager
       .createQueryBuilder()
       .insert()
-      .into(entity)
-      .values(datas)
+      .into(this.entity)
+      .values(data as QueryDeepPartialEntity<T>)
       .execute();
-  } catch (error) {
-    console.error(`Failed to insert data into ${entity}:`, error);
-    throw error;
-  }
-};
-
-const create = async <T extends ObjectLiteral>(
-  entity: EntityTarget<T>, 
-  data: DeepPartial<T>,
-  transactionalEntityManager?: EntityManager
-): Promise<T> => {
-  const repository = transactionalEntityManager
-    ? transactionalEntityManager.getRepository<T>(entity)
-    : dataSource.getRepository<T>(entity);
-  const newRecord = repository.create(data);
-  const savedRecord = await repository.save(newRecord);
-  return savedRecord;
-};
-// function update
-const updateArray=async <T extends ObjectLiteral>(
-  entity:EntityTarget<T>,
-  record:T[],
-  data:QueryDeepPartialEntity<T>,
-  transactionalEntityManager?: EntityManager
-):Promise<T[]>=>{
-    await Promise.all(record.map((item)=>update(entity,item,data,transactionalEntityManager)))
-    return record
-}
-const update = async <T extends ObjectLiteral>(
-  entity: EntityTarget<T>,
-  record:T,
-  data: QueryDeepPartialEntity<T>,
-  transactionalEntityManager?: EntityManager
-):Promise<T>=> {
-  const repository = transactionalEntityManager
-    ? transactionalEntityManager.getRepository<T>(entity)
-    : dataSource.getRepository<T>(entity);
-  if(record){
-    await repository.update(record.id, data);
-    return record
-  }
-};
-
-//function Remove
-const removeArray = async <T extends ObjectLiteral>(
-  entity: EntityTarget<T>,
-  ids:number[],
-  transactionalEntityManager: EntityManager
-): Promise<void> => {
-  if (ids.length === 0) {
-    console.warn('No records to delete');
-    return;
   }
 
-  try {
-    // Thực hiện xóa bằng danh sách ID
+  // Update a single record
+  async update(
+    id: number,
+    data: DeepPartial<T>,
+    transactionalEntityManager?: EntityManager
+  ): Promise<T> {
+    const repository = this.getRepository(transactionalEntityManager);
+    const existingRecord = await this.getBy(id,'id',null,transactionalEntityManager)
+    if(existingRecord){
+      await repository.update(id, data as QueryDeepPartialEntity<T>);
+      return existingRecord;
+    }
+  }
+
+  // Delete a single record
+  async remove(
+    id: number,
+    transactionalEntityManager?: EntityManager
+  ): Promise<void> {
+    const repository = this.getRepository(transactionalEntityManager);
+    const record =await this.getBy(id,'id',null,transactionalEntityManager)
+    if(record){
+      await repository.remove(record);
+    }
+  }
+
+  // Delete multiple records
+  async removeArray(
+    ids: number[],
+    transactionalEntityManager?: EntityManager
+  ): Promise<void> {
+    if (!ids.length) return;
     await transactionalEntityManager
       .createQueryBuilder()
       .delete()
-      .from(entity)
-      .whereInIds(ids) // Sử dụng danh sách ID để xác định bản ghi cần xóa
+      .from(this.entity)
+      .whereInIds(ids)
       .execute();
-  } catch (error) {
-    console.error(`Failed to delete records from ${entity}:`, error);
-    throw error;
   }
-};
-const remove = async <T extends ObjectLiteral>(
-  entity: EntityTarget<T>,
-  records: T,
-  transactionalEntityManager?: EntityManager
-  ):Promise<void> =>{
-    const repository = transactionalEntityManager
-    ? transactionalEntityManager.getRepository<T>(entity)
-    : dataSource.getRepository<T>(entity);
-  await repository.remove(records);
-};
-const getByArray = async <T extends ObjectLiteral>(
-  entity: EntityTarget<T>,
-  alias: string,
-  values: unknown[],
-  columnField: string = 'id',
-  transactionalEntityManager?: EntityManager
-): Promise<T[]> => {
-  if (values.length === 0) {
-    console.warn('No values provided for fetching records');
-    return [];
-  }
-
-  try {
-    // Sử dụng transactionalEntityManager nếu có, nếu không thì sử dụng dataSource
-    const manager = transactionalEntityManager || dataSource.manager;
-
-    // Tạo truy vấn với điều kiện WHERE IN
-    return await manager
-      .createQueryBuilder<T>(entity, alias)
-      .where(`${alias}.${columnField} IN (:...values)`, { values })
-      .getMany();
-  } catch (error) {
-    console.error(`Failed to fetch records from ${entity}:`, error);
-    throw error;
-  }
-};
-
-
-const getBy = async <T extends ObjectLiteral>(
-  entity: EntityTarget<T>,
-  alias:string,
-  value: unknown,
-  columnField: string = "id",
-  relations?: IRelationship[], // Danh sách các bảng cần join
-  transactionalEntityManager?: EntityManager
-): Promise<T | null> => {
-  const repository = transactionalEntityManager
-    ? transactionalEntityManager.getRepository<T>(entity)
-    : dataSource.getRepository<T>(entity);
-
-  // Sử dụng QueryBuilder để hỗ trợ join
-  const queryBuilder = repository.createQueryBuilder(alias);
-
-  // Thêm các mối quan hệ (join)
-  if (relations) {
-    relations.forEach((relation) => {
-      queryBuilder.leftJoinAndSelect(`${relation.original}`, relation.link);
-    });
-  }
-
-  // Thêm điều kiện where
-  queryBuilder.where(`${alias}.${columnField} = :value`, { value });
-
-  // Thực thi truy vấn
-  return await queryBuilder.getOne();
-};
-
-
-
-// DataService with generics
-const dataService = {
-  getBy,
-  getFilter,
-  getBuilderQuery,
-  getAllPagination,
-  getRepository,
-  create,
-  update,
-  remove,
-  createArray,
-  updateArray,
-  removeArray,
-  getByArray
 }
-
-export default dataService;

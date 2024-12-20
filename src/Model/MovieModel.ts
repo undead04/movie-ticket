@@ -1,7 +1,5 @@
-import { IsDate, IsIn, IsInt, IsNotEmpty, IsString } from "class-validator";
-import { IsUnique } from "../validations/UniqueValidator";
+import { IsDate, IsIn, IsInt, IsNotEmpty, IsPositive, IsString, Max, MaxLength, Min } from "class-validator";
 import { Movie } from "../Data/Movie";
-import { Exists } from "../validations/ExitsValidator";
 import { Genre } from "../Data/Genre";
 
 export interface IMovieModel{
@@ -17,21 +15,21 @@ export interface IMovieModel{
 export class MovieModel{
    @IsString({message:"Tên phim phải là một chuổi văn bản"})
    @IsNotEmpty({message:"Tên phim không được trống"})
-   @IsUnique(Movie,"title",'id',{message:'Tên phim không được trùng lặp'})
-   
+   @MaxLength(50,{message:"Tên phim tối đa 50 kí tự"})
    title!:string;
 
    @IsString({message:"Mô tả phải là một chuổi văn bản"})
    @IsNotEmpty({message:"Mô tả không được trống"})
+   @MaxLength(300,{message:"Mô tả phim tối đa 300 kí tự"})
    description:string;
 
    @IsInt({message:"Thời lượng phải là số nguyên"})
+   @IsPositive({message:"Thời lượng phim phải là số dương"})
+   @Max(200,{message:"Thời lượng phim tốt đa 200 phút"})
    duration: number; // Thời lượng phim (phút)
-
    
    releaseDate: Date;
 
-   
    endDate: Date;
 
    @IsString({message:"trailerUrl phải là một chuổi văn bản"})
@@ -43,22 +41,6 @@ export class MovieModel{
    posterUrl:string;
 
    @IsNotEmpty({message:"Không đc trống"})
-   @Exists(Genre,"id",{message:"Không tìm thấy thể loại phim này"})
    genreId:number[];
-
-   @IsInt()
-   id?:number
-   // Constructor
-   constructor(id:number,data:IMovieModel) {
-       this.title = data.title;
-       this.description = data.description;
-       this.duration=data.duration,
-       this.endDate=data.endDate,
-       this.trailerUrl=data.trailerUrl,
-       this.releaseDate=data.releaseDate,
-       this.posterUrl=data.posterUrl,
-       this.genreId=data.genreId,
-       this.id=id
-   }
 
 }

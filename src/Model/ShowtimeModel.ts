@@ -1,5 +1,4 @@
-import { IsDate, IsInt, IsNotEmpty, IsNumber, IsString } from "class-validator"
-import { Exists } from "../validations/ExitsValidator";
+import {IsDecimal, IsInt, IsNotEmpty, IsNumber, IsPositive, IsString } from "class-validator"
 import { Movie } from "../Data/Movie";
 import { Screen } from "../Data/Screen";
 
@@ -14,27 +13,20 @@ export interface IShowtimeModel{
 export class ShowtimeModel{
     
     showDate:Date;
-    @IsNotEmpty()
-    @IsString()
+    @IsNotEmpty({message:"End time không được trống"})
+    @IsString({message:"End time phải là kiểu chuổi"})
     endTime:string;
-    @IsNotEmpty()
-    @IsString()
+    @IsNotEmpty({message:"Start time không được trống"})
+    @IsString({message:"Start time phải là kiểu chuổi"})
     startTime:string
-    @IsNumber()
+    @IsInt({message:"Phải là kiểu số"})
+    @IsNotEmpty({message:"Price không được trống"})
+    @IsPositive({message:"Tiền phải là số dương"})
     price:number
-    @Exists(Movie,"id")
+    @IsInt({message:"Phải là kiểu số"})
+    @IsNotEmpty({message:"moveId không được trống"})
     movieId:number
-    @Exists(Screen,"id")
+    @IsInt({message:"Phải là kiểu số"})
+    @IsNotEmpty({message:"screenId không được trống"})
     screenId:number
-    @IsInt()
-    id?:number
-    constructor(id:number,data:IShowtimeModel){
-        this.endTime=data.endTime;
-        this.id=id,
-        this.movieId=data.movieId,
-        this.price=data.price,
-        this.screenId=data.screenId,
-        this.showDate=data.showDate,
-        this.startTime=data.startTime
-    }
 }

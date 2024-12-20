@@ -1,38 +1,32 @@
 import { NextFunction,Request,Response } from "express";
 import { IReviewModel, ReviewModel } from "../Model/ReviewModel";
 import { AuthRequest } from "../Middlewares/Auth";
-import dataService from "../Service/DataService";
 import { Review } from "../Data/Review";
 import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
-import dataController from "./DataController";
 import { IDataDeleteModel } from "../Model/dataModel";
 import dataSource from "../DataSource";
 import AppRole from "../Model/GroupRoleModel";
 import { Ticket } from "../Data/Ticket";
-
-const getAllWithFilterAndPagination=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
+import ReviewService from '../Services/ReviewController'
+export default class ReviewController{
+    protected reviewService:ReviewService
+    constructor(){
+        this.reviewService = new ReviewService()
+    }
+    
+async getAllWithFilterAndPagination (req:Request,res:Response,next:NextFunction):Promise<void>{
     try{
         const {rating,movieId,orderBy,sort,page,pageSize}=req.query;
         const pageNumber = Number(page) || 1;
         const pageSizeNumber = Number(pageSize) || 10;
         const orderByField=orderBy as string;
         const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";
-        let queryBuilder =(await dataService.getBuilderQuery(Review,'review'))
-        if(rating){
-            queryBuilder=queryBuilder.where("review.rating = :rating",{rating})
-        }
-        if(movieId){
-            queryBuilder=queryBuilder.andWhere('review.movieId=:movieId',{movieId})
-        }
-        if(orderByField){
-            queryBuilder=queryBuilder.orderBy(`review.${orderByField}`,sortOrder)
-        }
-        const data=await dataService.getAllPagination(Review,queryBuilder,pageNumber,pageSizeNumber)
+        const data = await this.reviewService.getFillter(rating,movieId)
         res.status(200).json(RepositoryDTO.WithData(200,data))
         
     }catch(error:any){
         console.log(error)
-        res.status(500).json(error)
+        next(error)
     }
 
 }
@@ -45,7 +39,7 @@ const get=async(req:Request,res:Response,next:NextFunction):Promise<void> =>{
         res.status(200).json(RepositoryDTO.WithData(200,data))
     }catch(error:any){
         console.log(error)
-        res.status(500).json(error)
+        next(error)
     }
 
 }
@@ -68,7 +62,7 @@ const remove=async(req:AuthRequest,res:Response,next:NextFunction):Promise<void>
         res.status(200).json(RepositoryDTO.Success("Xóa bình luận thành công"))
     }catch(error:any){
         console.log(error)
-        res.status(500).json(error)
+        next(error)
     }
 
 }
@@ -95,7 +89,7 @@ const create=async(req:AuthRequest,res:Response,next:NextFunction):Promise<void>
          res.status(200).json(RepositoryDTO.Success("Tạo bình luận thành công"))
     }catch(error:any){
         console.log(error)
-        res.status(500).json(error)
+        next(error)
     }
 
 }
@@ -114,7 +108,7 @@ const update=async(req:AuthRequest,res:Response,next:NextFunction):Promise<void>
          res.status(200).json(RepositoryDTO.Success("Cập nhập bình luận thành công"))
     }catch(error:any){
         console.log(error)
-        res.status(500).json(error)
+        next(error)
     }
 
 }
@@ -129,10 +123,8 @@ const removeArray=async(req:Request,res:Response,next:NextFunction):Promise<void
         res.status(200).json(RepositoryDTO.Success("Xóa bình luận thành công"))
      }catch(error:any){
          console.log(error)
-         res.status(500).json(error)
+         next(error)
      }
 }
-const reviewController={
-    create,get,remove,getAllWithFilterAndPagination,update,removeArray
+
 }
-export default reviewController

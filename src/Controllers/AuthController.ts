@@ -1,32 +1,27 @@
 import { NextFunction,Request,Response } from "express";
-import { IUserModel, UserModel } from "../Model/UserModel";
-import dataService from "../Service/DataService";
-import { User } from "../Data/User";
+import { IUserModel } from "../Model/UserModel";
 import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import dataController from "./DataController";
-import { GroupRole } from "../Data/GroupRole";
-import AppRole from "../Model/GroupRoleModel";
-const saltRounds = 10;
-const login=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
+import UserService from "../Service/UserService";
+import { AutoBind } from "../utils/AutoBind";
+
+export default class AuthController{
+  userService:UserService
+  constructor(){
+    this.userService = new UserService()
+  }
+  @AutoBind
+  async login(req:Request,res:Response,next:NextFunction):Promise<void>{
     try{
         const {email,password}=req.body
-        const userData=await dataService.getBy(User,'user',email,'email',[
-          {
-            original:'user.groupRole',link: "groupRole"
-          }
+        
+        const userData=await this.userService.getBy(email,'email',[
+          {original:'user.groupRole',link:"grouprole"}
         ])
-        if(userData==null){
+        const result=await this.userService.generateToken(userData,password)
+        if(result==null) {
           res.status(400).json(RepositoryDTO.Error(400,"Mật khẩu hoặc email sai"))
-          return;
+          return
         }
-        const isMatch:boolean= await bcrypt.compare(password,userData.password_hash);
-        if(!isMatch){
-          res.status(400).json(RepositoryDTO.Error(400,"Mật khẩu hoặc email sai"))
-          return;
-        }
-        const result = jwt.sign({ id: userData.id, role:userData.groupRole.name }, 'authToken', { expiresIn: '1h' });
         res.cookie("authToken", result, {
             httpOnly: true,
             secure: true,
@@ -38,42 +33,32 @@ const login=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
         console.log(error)
         res.status(500).json(error)
     }
-}
-const logout=(req:Request,res:Response,next:NextFunction)=>{
-    try {
-        // Xóa cookie authToken
-        res.clearCookie('authToken', {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
-        });
-        // Trả về phản hồi thành công
-        res.status(200).json(RepositoryDTO.Success("Đăng xuất thành công"));
-      } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Có lỗi xảy ra khi đăng xuất' });
-      }
-}
-const register=async(req:Request,res:Response,next:NextFunction)=>{
+  }
+  @AutoBind
+  async logout (req:Request,res:Response,next:NextFunction){
+      try {
+          // Xóa cookie authToken
+          res.clearCookie('authToken', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+          });
+          // Trả về phản hồi thành công
+          res.status(200).json(RepositoryDTO.Success("Đăng xuất thành công"));
+        } catch (error) {
+          console.log(error);
+          res.status(500).json({ message: 'Có lỗi xảy ra khi đăng xuất' });
+        }
+  }
+    @AutoBind
+    async register (req:Request,res:Response,next:NextFunction){
     try{
         const model:IUserModel=req.body
-        const validateError = new UserModel(model);
-        if(await dataController.validateError(res,validateError)) return
-        const salt = await bcrypt.genSalt(saltRounds);
-        
-        // Băm mật khẩu với salt
-        const hash = await bcrypt.hash(model.password, salt);
-        const role=await (await dataService.getBuilderQuery(GroupRole)).andWhere('groupRole.name=:name',{name:AppRole.User}).getOne()
-        await dataService.create(User,{
-          ...model,
-          password_hash:hash,
-          groupRole:{id:role.id}
-        })
+        this.userService.create(model)
         res.status(200).json(RepositoryDTO.Success("Tạo tài khoản người chơi thành công"))
     }catch(error:any){
         console.log(error);
         res.status(500).json(error)
     }
 }
-const authController={login,logout,register}
-export default authController
+}
