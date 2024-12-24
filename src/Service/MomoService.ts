@@ -1,8 +1,10 @@
 import axios from 'axios';
 import crypto from 'crypto';
-import { IMomoModel, ITransactionStatus } from '../Model/MomoModel';
+import {  ITransactionStatus, MomoModel } from '../Model/MomoModel';
 
-export const createMoMoPayment = async (model: IMomoModel) => {
+export default class MomoService{
+    
+ async createMoMoPayment  (model: MomoModel) {
     const partnerCode = process.env.MOMO_PARTNER_CODE;
     const accessKey = process.env.MOMO_ACCESS_KEY;
     const secretKey = process.env.MOMO_SECRET_KEY;
@@ -58,7 +60,7 @@ export const createMoMoPayment = async (model: IMomoModel) => {
         throw new Error('Failed to create MoMo payment');
     }
 };
-export const transactionStatusOrder=async (model:ITransactionStatus)=>{
+ async transactionStatusOrder (model:ITransactionStatus){
     const partnerCode = process.env.MOMO_PARTNER_CODE;
     const accessKey = process.env.MOMO_ACCESS_KEY;
     const endpoint = process.env.MOMO_ENDPOINT_CHECK;
@@ -88,4 +90,5 @@ export const transactionStatusOrder=async (model:ITransactionStatus)=>{
     throw new Error('Failed to create MoMo payment');
 }
 
+}
 }

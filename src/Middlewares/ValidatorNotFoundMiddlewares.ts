@@ -13,15 +13,23 @@ export default class ValidatorNotFoundMiddlewares<T extends ObjectLiteral>{
         this.dataService=new DataService<T>(entity,alias);
         this.messageNotFound=messageNotFound
     }
+    protected async validateNotFoud(id:number,res:Response){
+        const record = await this.dataService.getBy(id)
+            if(record==null){
+                res.status(404).json(RepositoryDTO.Error(404,this.messageNotFound+` id = ${id}`))
+                return true
+            }
+            return false
+    }
     @AutoBind
     async IsNotFound(req:Request,res:Response,next:NextFunction){
         try{
-            const id:number=Number(req.params.id)
-            const record = await this.dataService.getBy(id)
-            if(record==null){
-                res.status(404).json(RepositoryDTO.Error(404,this.messageNotFound))
+            const id = Number(req.params.id);
+            if (!/^\d+$/.test(id.toString())) {
+                res.status(400).json(RepositoryDTO.Error(400,"Invalid ID format"));
                 return
             }
+            if(await this.validateNotFoud(id,res)) return
             next()
         }catch(error){
             console.log(error)
@@ -35,10 +43,11 @@ export default class ValidatorNotFoundMiddlewares<T extends ObjectLiteral>{
         next:NextFunction
     ){
         const model:IDataDeleteModel=req.body
-        for(let i=0;i<model.ids.length;i++){
-          this.IsNotFound(req,res,next)
+        for(const id of model.ids){
+            if(await this.validateNotFoud(id,res)) return
         }
         next()
+        
      }
 }
 

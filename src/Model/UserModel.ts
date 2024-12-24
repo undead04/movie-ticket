@@ -1,19 +1,34 @@
-import { IsEmail, IsNotEmpty, IsString, MaxLength } from "class-validator";
-import { User } from "../Data/User";
+import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
 
-export interface IUserModel {
-
-    username: string;
-    password: string;
-    email: string;
-}
-export interface IUserUpdateModel{
-    username:string,
+export class UserUpdateModel{
+    @IsNotEmpty()
+    @IsString()
+    username:string
+    @IsNotEmpty()
+    @IsString()
     phone:string
 }
-export interface IPasswordModel{
-    oldPassword:string,
-    newPassword:string,
+export class LoginModel{
+    @IsEmail()
+    @IsNotEmpty()
+    @IsString()
+    email:string;
+    @MinLength(8)
+    @MaxLength(30)
+    password:string
+}
+export class PasswordModel{
+    @IsNotEmpty()
+    @IsString()
+    @MinLength(8)
+    oldPassword:string
+    @IsNotEmpty()
+    @IsString()
+    @MinLength(8)
+    newPassword:string
+    @IsNotEmpty()
+    @IsString()
+    @MinLength(8)
     confirmPassword:string
 }
 export class UserModel{
@@ -28,10 +43,5 @@ export class UserModel{
     @IsNotEmpty()
     @IsEmail()
     email:string;
-    
-    constructor(data:IUserModel){
-        this.username=data.username;
-        this.password=data.password;
-        this.email=data.email;
-    }
+
 }

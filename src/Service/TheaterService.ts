@@ -1,20 +1,18 @@
 import { DeepPartial, EntityManager } from "typeorm";
-import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import { IsDuplicatesWithSort } from "../utils/GenerationCode";
 import DataService from "./DataService";
 import CustomError from "../validations/CustumError";
 import { Theater } from "../Data/Theater";
-import { Ticket } from "../Data/Ticket";
+import dataSource from "../DataSource";
 
-export default class TheaterService extends DataService<Theater>{ 
-    protected ticketService:DataService<Ticket>
+export default class TheaterService{ 
+    protected theaterService:DataService<Theater>
     constructor(){
-        super(Theater,'theater')
-        this.ticketService = new DataService(Ticket,'ticket')
+        this.theaterService = new DataService(Theater,'theater')
     }
     async getFillter(name?:string,city?:string,address?:string,orderBy?:string,sort?:string,page:number=1,pageSize:number=10){
         const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";     
-        let queryBuilder =(await this.createQueryBuilder())
+        let queryBuilder =(await this.theaterService.createQueryBuilder())
         if(city){
             queryBuilder=queryBuilder.where("theater.city = :city",{city})
         }
@@ -27,72 +25,85 @@ export default class TheaterService extends DataService<Theater>{
         if(orderBy){
             queryBuilder=queryBuilder.orderBy(`theater.${orderBy}`,sortOrder)
         }
-        const data=await this.getPagination(queryBuilder,page,pageSize)
+        const data=await this.theaterService.getPagination(queryBuilder,page,pageSize)
         return data
     }
-    protected async isUniqueName(name:string){
-        const record=await this.getBy(name,'name')
+    protected async isUnique(name:string){
+        const record=await (await this.theaterService.createQueryBuilder())
+        .andWhere("LOWER(theater.name) =:name",{name:name.trim().toLowerCase()}).getOne()
         if(record){
-            return true
+            return record
         }
-        return false
+    }
+    protected async validateTheater(id:number){
+       return await this.theaterService.isNotFound(id, `Tên rạp chiếu này không tồn tại id = ${id}`) 
     }
     protected async validate(id: number, data: DeepPartial<Theater>) {
         // Kiểm tra sự tồn tại của bản ghi
-        const record = id ? await this.isNotFound(id, `Tên rạp chiếu này không tồn tại id = ${id}`) : null;
+        if(id)  await this.validateTheater(id)
         // Kiểm tra tên rạp chiếu có trùng hay không
-        const isNameUnique = await this.isUniqueName(data.name);
+        const record = await this.isUnique(data.name);
         // Nếu record là null (tức là không có bản ghi nào), kiểm tra tên rạp chiếu
-        if (record === null && isNameUnique) {
+        if (record  && record.id!=id) {
           throw new CustomError(`Tên rạp chiếu phim ${data.name} đã tồn tại`, 400,'name');
         }
-        // Nếu có bản ghi, kiểm tra nếu tên rạp chiếu trùng với bản ghi khác, và id không giống nhau
-        if (record && isNameUnique && record.id !== id) {
-          throw new CustomError(`Tên rạp chiếu phim ${data.name} đã tồn tại`, 400,'name');
-        }
+
       }
       
-    protected async getTicket(){
-        const recordTicket=await (await this.ticketService.createQueryBuilder())
-            .innerJoin('ticket.showtime',"showtime")
-            .innerJoin('showtime.screen','screen')
-        return recordTicket
-    }
-    protected async validateRemove(id:number){
-        const record = await this.getBy(id)
-        const ticketRecord = await (await this.getTicket()).andWhere('screen.theaterId =: id',{id}).getOne()
-        if(ticketRecord){
-            throw new CustomError(`Nếu xóa rạp chiếu phim ${record.name} thì lượng lớn dữ liệu sẽ mất`,409)
-        }
-    }
     async create(data: DeepPartial<Theater>, transactionalEntityManager?: EntityManager): Promise<Theater> {
         await this.validate(0,data)
-        return await super.create(data,transactionalEntityManager)
+        return await this.theaterService.create(data,transactionalEntityManager)
     }
     async createArray(
         datas: DeepPartial<Theater>[],
-        transactionalEntityManager: EntityManager
       ): Promise<void> {
         const arrayName=datas.map(data=>({
-            name:data.name
+            name:data.name.trim().toLocaleLowerCase()
         }))
         if(IsDuplicatesWithSort(arrayName)){
-            throw new CustomError(`Tạo thể loại thất bại vì có model trùng tên ${arrayName[0].name}`,400)
+            throw new CustomError(`Tạo thể loại thất bại vì có model trùng tên`,400)
         }
-        await Promise.all(datas.map(async(data)=>this.validate(0,data)))
-        await super.createArray(datas,transactionalEntityManager)
-      }
-    async remove(id: number, transactionalEntityManager?: EntityManager): Promise<void> {
-        await this.validateRemove(id)
-        await super.remove(id,transactionalEntityManager)
+        await dataSource.manager.transaction(async(transactionEntityManager)=>{
+            for(const data of datas){
+                await this.create(data,transactionEntityManager)
+            }
+        })
+        
     }
-    async removeArray(ids: number[], transactionalEntityManager?: EntityManager): Promise<void> {
-        await Promise.all(ids.map(async(id)=> this.validateRemove(id)))
-        await super.removeArray(ids,transactionalEntityManager)
-    }
-    async update(id: number, data: DeepPartial<Theater>, transactionalEntityManager?: EntityManager): Promise<Theater> {
+    async update(id: number, data: DeepPartial<Theater>): Promise<Theater> {
         await this.validate(id,data)
-        return await super.update(id,data,transactionalEntityManager)
+        return await this.theaterService.update(id,data)
+    }
+    async get(id:number){
+        return await this.theaterService.getBy(id)
+    }
+    async remove(id:number,transactionEntityManager?:EntityManager){
+        await this.validateTheater(id)
+        await this.theaterService.remove(id,transactionEntityManager)
+    }
+    async removeArray(ids:number[]){
+        if(IsDuplicatesWithSort(ids)){
+            throw new CustomError(`Trong req.body có hai id trùng nhau`,400)
+        }
+        await dataSource.manager.transaction(async(transactionEntityManager)=>{
+            for(const id of ids){
+                await this.remove(id,transactionEntityManager)
+            }
+        })
+    }
+    async waningDelete(ids:number[]){
+        if(Array.isArray(ids)){
+            await Promise.all(ids.map(async(id)=>await this.checkWaningDelete(id)))
+        }
+    }
+    protected async checkWaningDelete(id:number){
+        await this.validateTheater(id)
+        const record=await (await this.theaterService.createQueryBuilder())
+        .innerJoin('theater.screens','screen')
+        .andWhere('screen.theaterId=:id',{id}).getOne()
+        if(record){
+            throw new CustomError(`Bạn xóa rạp chiếu phim này ${record.name} có thể mất nhiều dữ liệu quan trọng`,409)
+        }
     }
     
 }

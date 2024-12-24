@@ -4,7 +4,8 @@ import ValidateErrorMiddleware from '../Middlewares/ValidateErrorMiddlware';
 import ValidatorNotFoundMiddlewares from '../Middlewares/ValidatorNotFoundMiddlewares';
 import ScreenController from '../Controllers/ScreenController';
 import { ScreenModel } from '../Model/ScreenModel';
-
+import { Screen } from "../Data/Screen";
+import AppRole from '../Model/GroupRoleModel';
 const router = express.Router();
 const screenController = new ScreenController()
 const validateError=new ValidateErrorMiddleware<ScreenModel>(ScreenModel)
@@ -12,25 +13,29 @@ const validatorNotFound=new ValidatorNotFoundMiddlewares(Screen,'screen',"Không
 // Lấy tất cả genres với filter và phân trang
 router.get('/',
      screenController.getAllWithFilterAndPagination);
-router.get("/:id",
-    validatorNotFound.IsNotFound,
-    screenController.get)
 router.post("/",
-    authenticateToken,
+    authenticateToken([AppRole.Admin]),
     validateError.ValidateError,
     screenController.create)
 router.post("/createArray",
-    authenticateToken,
+    authenticateToken([AppRole.Admin]),
     validateError.ValidateError,
     screenController.createArray)
-router.put("/:id",authenticateToken,
+router.post('/checkWarningDelete'
+    ,authenticateToken([AppRole.Admin])
+    ,validatorNotFound.IsNotFoundArray
+    ,screenController.waningDelete)
+router.delete("/",authenticateToken([AppRole.Admin]),
+    validatorNotFound.IsNotFoundArray,
+    screenController.removeArray)
+router.put("/:id",authenticateToken([AppRole.Admin]),
     validatorNotFound.IsNotFound,
     validateError.ValidateError,
     screenController.update)
-router.delete("/:id",authenticateToken,
+router.get("/:id",
+    validatorNotFound.IsNotFound,
+    screenController.get)
+router.delete("/:id",authenticateToken([AppRole.Admin]),
     validatorNotFound.IsNotFound,
     screenController.remove)
-router.delete("/",authenticateToken,
-    validatorNotFound.IsNotFoundArray,
-    screenController.removeArray)
 export default router;

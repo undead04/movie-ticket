@@ -1,14 +1,10 @@
 import {  IsInt, IsNotEmpty, IsString, Max, Min } from "class-validator";
-import { Screen } from "../Data/Screen";
-import { Seat } from "../Data/Seat";
-
 export interface ISeatModel{
     row:number,
     col:number,
     seatNumber:string
     screenId:number
 }
-
 export class SeatModel{
     
     @IsNotEmpty({message:"Vị trí hàng ngang không được trống"})
@@ -30,14 +26,4 @@ export class SeatModel{
     @IsInt({message:"Phải là số"})
     @IsNotEmpty({message:"Không được trống"})
     screenId:number
-    @IsInt()
-    id?:number
-    // Constructor
-    constructor(id:number,data:ISeatModel) {
-        this.row = data.row;
-        this.col=data.col;
-        this.screenId=data.screenId
-        this.seatNumber=data.seatNumber
-        this.id=id
-    }
 }

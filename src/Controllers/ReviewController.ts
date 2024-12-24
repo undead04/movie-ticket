@@ -1,27 +1,29 @@
 import { NextFunction,Request,Response } from "express";
-import { IReviewModel, ReviewModel } from "../Model/ReviewModel";
 import { AuthRequest } from "../Middlewares/Auth";
-import { Review } from "../Data/Review";
 import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
 import { IDataDeleteModel } from "../Model/dataModel";
-import dataSource from "../DataSource";
-import AppRole from "../Model/GroupRoleModel";
-import { Ticket } from "../Data/Ticket";
-import ReviewService from '../Services/ReviewController'
+import ReviewService from '../Service/ReviewService'
+import { ReviewModel, ReviewUpdateModel } from "../Model/ReviewModel";
+import { AutoBind } from "../utils/AutoBind";
 export default class ReviewController{
     protected reviewService:ReviewService
     constructor(){
         this.reviewService = new ReviewService()
+        
     }
-    
-async getAllWithFilterAndPagination (req:Request,res:Response,next:NextFunction):Promise<void>{
+@AutoBind    
+async getAllWithFilterAndPagination (req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
     try{
         const {rating,movieId,orderBy,sort,page,pageSize}=req.query;
         const pageNumber = Number(page) || 1;
         const pageSizeNumber = Number(pageSize) || 10;
         const orderByField=orderBy as string;
         const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";
-        const data = await this.reviewService.getFillter(rating,movieId)
+        const ratingNumber = Number(rating)
+        const movieIdNumber = Number(movieId)
+        const id = req._id
+        const role = req.role
+        const data = await this.reviewService.getFillter(id,role,ratingNumber,movieIdNumber,orderByField,sortOrder,pageNumber,pageSizeNumber)
         res.status(200).json(RepositoryDTO.WithData(200,data))
         
     }catch(error:any){
@@ -30,12 +32,12 @@ async getAllWithFilterAndPagination (req:Request,res:Response,next:NextFunction)
     }
 
 }
-const get=async(req:Request,res:Response,next:NextFunction):Promise<void> =>{
+@AutoBind
+async get (req:Request,res:Response,next:NextFunction):Promise<void>{
     try{
       
         const id=Number(req.params.id);
-        const data=await dataService.getBy(Review,'review',id);
-        if(await dataController.IsNotFound(res,data,"Không tìm thấy bình luận này")) return;
+        const data = await this.reviewService.get(id)
         res.status(200).json(RepositoryDTO.WithData(200,data))
     }catch(error:any){
         console.log(error)
@@ -43,22 +45,13 @@ const get=async(req:Request,res:Response,next:NextFunction):Promise<void> =>{
     }
 
 }
-const remove=async(req:AuthRequest,res:Response,next:NextFunction):Promise<void>=>{
+@AutoBind
+async remove (req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
     try{
        const id=Number(req.params.id)
        const role:string=req.role
        const userId:number=req._id
-       const data=await dataService.getBy(Review,"review",id,'id',[
-        {
-            original:"review.user",link:"user"
-        }
-       ])
-       if(await dataController.IsNotFound(res,data,"Không tìm thấy bình luận này")) return;
-       if(role==AppRole.User&&data.user.id!=userId){
-         res.status(403).json(RepositoryDTO.Error(403,"Bạn không đủ quyền hạn để xóa bình luận này"))
-         return
-       }
-        await dataService.remove(Review,data)
+        await this.reviewService.remove(id)
         res.status(200).json(RepositoryDTO.Success("Xóa bình luận thành công"))
     }catch(error:any){
         console.log(error)
@@ -66,22 +59,14 @@ const remove=async(req:AuthRequest,res:Response,next:NextFunction):Promise<void>
     }
 
 }
-const create=async(req:AuthRequest,res:Response,next:NextFunction):Promise<void>=>{
+@AutoBind
+async create (req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
     try{
       
         // Tạo đối tượng từ request body
-        const model:IReviewModel=req.body;
-        const validateError = new ReviewModel(model);
-        const userId:number=req._id
-        const ticket=await (await dataService.getBuilderQuery(Ticket,'ticket')).
-            innerJoin('ticket.showtime','showtime')
-            .andWhere('showtime.movieId=:value',{value:model.movieId}).getOne()
-        if(!ticket){
-            res.status(403).json(RepositoryDTO.Error(403,"Bạn không có đủ điều kiện để bình luận phim chiếu rạp này"))
-            return
-        }
-        if(await dataController.validateError(res,validateError)) return;
-         await dataService.create(Review,{
+        const model:ReviewModel=req.body;
+        const userId = req._id
+         await this.reviewService.create({
             ...model,
             movie:{id:model.movieId},
             user:{id:userId}
@@ -93,18 +78,12 @@ const create=async(req:AuthRequest,res:Response,next:NextFunction):Promise<void>
     }
 
 }
-const update=async(req:AuthRequest,res:Response,next:NextFunction):Promise<void>=>{
+@AutoBind
+async update (req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
     try{
         const id=Number(req.params.id);
-        const model:IReviewModel=req.body;
-        const data=await dataService.getBy(Review,'review',id)
-        const validateError = new ReviewModel(model);
-        if(await dataController.IsNotFound(res,data,"Không tìm thấy bình luận này")) return;
-        if(await dataController.validateError(res,validateError)) return
-        await dataService.update(Review,data,{
-            comment:model.comment,
-            rating:model.rating,
-        })
+        const model:ReviewUpdateModel=req.body;
+        this.reviewService.update(id,model)
          res.status(200).json(RepositoryDTO.Success("Cập nhập bình luận thành công"))
     }catch(error:any){
         console.log(error)
@@ -112,15 +91,12 @@ const update=async(req:AuthRequest,res:Response,next:NextFunction):Promise<void>
     }
 
 }
-const removeArray=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
+@AutoBind
+async removeArray (req:Request,res:Response,next:NextFunction):Promise<void>{
     try{
         const model:IDataDeleteModel=req.body;
-        const records=await dataService.getByArray(Review,"review",model.ids);
-        if(await dataController.IsNotFoundArray(res,records,"Không tìm thấy bình luận  này")) return
-        await dataSource.manager.transaction(async(transactionEntityManager)=>{
-            await dataService.removeArray(Review,model.ids,transactionEntityManager)
-        })
-        res.status(200).json(RepositoryDTO.Success("Xóa bình luận thành công"))
+        this.reviewService.removeArray(model.ids)
+        res.status(200).json(RepositoryDTO.Success("Xóa các bình luận thành công"))
      }catch(error:any){
          console.log(error)
          next(error)

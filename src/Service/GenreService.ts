@@ -1,69 +1,98 @@
-import { DeepPartial, EntityManager } from "typeorm";
+import { DataSource, DeepPartial, EntityManager } from "typeorm";
 import { IsDuplicatesWithSort } from "../utils/GenerationCode";
 import DataService from "./DataService";
 import { Genre } from "../Data/Genre";
 import CustomError from "../validations/CustumError";
+import dataSource from "../DataSource";
 
-export default class GenreService extends DataService<Genre>{
+export default class GenreService{
+    protected genreRepository:DataService<Genre>
     constructor(){
-        super(Genre,'genre')
+        this.genreRepository = new DataService(Genre,'genre')
     }
     async getFillter(name?:string,orderBy?:string,sort?:string,page:number=1,pageSize:number=10){
         const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";
-        let queryBuilder = await this.createQueryBuilder()
+        let queryBuilder = await this.genreRepository.createQueryBuilder()
         if(name){
             queryBuilder=queryBuilder.where("genre.name LIKE :name",{name:`%${name}%`})
         }
         if(orderBy){
             queryBuilder=queryBuilder.orderBy(`genre.${orderBy}`,sortOrder)
         }
-        const data=await this.getPagination(queryBuilder,page,pageSize)
+        const data=await this.genreRepository.getPagination(queryBuilder,page,pageSize)
         return data
     }
-    protected async isUniqueName(name:string){
-        const genre=await this.getBy(name,'name')
+    protected async isUnique(name:string){
+        const genre = await (await this.genreRepository.createQueryBuilder())
+        .andWhere('LOWER(genre.name) =:name',{name:name.trim().toLowerCase()}).getOne()
         if(genre){
-            return true
+            return genre
         }
-        return false
+    }
+    protected async validateGenre(id:number){
+        return await this.genreRepository.isNotFound(id, `Tên thể loại này không tồn tại id = ${id}`)
     }
     protected async validate(id: number, data: DeepPartial<Genre>) {
         // Kiểm tra sự tồn tại của bản ghi
-        const record = id ? await this.isNotFound(id, `Tên thể loại này không tồn tại id = ${id}`) : null;
-        
+        if(id) await this.validateGenre(id)
         // Kiểm tra tên thể loại có trùng hay không
-        const isNameUnique = await this.isUniqueName(data.name);
-        
-        // Nếu record là null (tức là không có bản ghi nào), kiểm tra tên thể loại
-        if (record === null && isNameUnique) {
-          throw new CustomError(`Tên thể loại phim ${data.name} đã tồn tại`, 400,'name');
-        }
-        
-        // Nếu có bản ghi, kiểm tra nếu tên thể loại trùng với bản ghi khác, và id không giống nhau
-        if (record && isNameUnique && record.id !== id) {
+        const record = await this.isUnique(data.name);
+        if (record  && record.id !== id) {
           throw new CustomError(`Tên thể loại phim ${data.name} đã tồn tại`, 400,'name');
         }
       }      
-    async create(data: DeepPartial<Genre>, transactionalEntityManager?: EntityManager): Promise<Genre> {
+    async create(data: DeepPartial<Genre>,transactionEntityManager?:EntityManager): Promise<Genre> {
         
         await this.validate(0,data);
-        return await super.create(data,transactionalEntityManager)
+        return await this.genreRepository.create(data,transactionEntityManager)
+    }
+    async get(id:number){
+        return await this.genreRepository.getBy(id)
     }
     async createArray(
-        datas: DeepPartial<Genre>[],
-        transactionalEntityManager: EntityManager
+        datas: DeepPartial<Genre>[], 
       ): Promise<void> {
         const arrayName=datas.map(data=>({
-            name:data.name
+            name:data.name.trim().toLowerCase()
         }))
         if(IsDuplicatesWithSort(arrayName)){
             throw new CustomError(`Tạo thể loại thất bại vì có model trùng tên`,400)
         }
-        await Promise.all(datas.map(async(data)=>this.validate(0,data)))
-        await super.createArray(datas,transactionalEntityManager)
+        await dataSource.manager.transaction(async(transactionEntityManager)=>{
+            for(const data of datas){
+                await this.create(data,transactionEntityManager)
+            }
+        })
       }
-    async update(id: number, data: DeepPartial<Genre>, transactionalEntityManager?: EntityManager): Promise<Genre> {
+    async update(id: number, data: DeepPartial<Genre>): Promise<Genre> {
         await this.validate(id,data)
-        return await super.update(id,data,transactionalEntityManager)
+        return await this.genreRepository.update(id,data)
+    }
+    async remove(id:number,transactionEntityManager?:EntityManager){
+        await this.validateGenre(id)
+        await this.genreRepository.remove(id,transactionEntityManager)
+    }
+    async removeArray(ids:number[]){
+        if(IsDuplicatesWithSort(ids)){
+            throw new CustomError(`Trong req.body có hai id trùng nhau`,404)
+        } 
+        await dataSource.manager.transaction(async(transactionEntityManager)=>{
+            for(const id of ids){
+                await this.remove(id,transactionEntityManager)
+            }
+        })
+    }
+    async waningDelete(ids:number[]){
+        if(Array.isArray(ids)){
+            await Promise.all(ids.map(async(id)=>await this.checkWaningDelete(id)))
+        }
+    }
+    protected async checkWaningDelete(id:number){
+        await this.validateGenre(id)
+        const records =await (await this.genreRepository.createQueryBuilder()).innerJoin('genre.movieGenre','movieGenre')
+        .andWhere('movieGenre.genreId =:id',{id}).getOne()
+        if(records){
+            throw new CustomError(`Bạn xóa thể loại ${records.name} có thể mất nhiều dữ liệu quan trọng`,409)
+        }
     }
 }

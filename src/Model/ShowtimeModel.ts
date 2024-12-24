@@ -1,6 +1,4 @@
 import {IsDecimal, IsInt, IsNotEmpty, IsNumber, IsPositive, IsString } from "class-validator"
-import { Movie } from "../Data/Movie";
-import { Screen } from "../Data/Screen";
 
 export interface IShowtimeModel{
     showDate:Date,

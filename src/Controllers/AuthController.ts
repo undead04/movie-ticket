@@ -1,5 +1,5 @@
 import { NextFunction,Request,Response } from "express";
-import { IUserModel } from "../Model/UserModel";
+import { LoginModel, UserModel } from "../Model/UserModel";
 import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
 import UserService from "../Service/UserService";
 import { AutoBind } from "../utils/AutoBind";
@@ -12,12 +12,9 @@ export default class AuthController{
   @AutoBind
   async login(req:Request,res:Response,next:NextFunction):Promise<void>{
     try{
-        const {email,password}=req.body
-        
-        const userData=await this.userService.getBy(email,'email',[
-          {original:'user.groupRole',link:"grouprole"}
-        ])
-        const result=await this.userService.generateToken(userData,password)
+        const model: LoginModel=req.body
+        const userData=await this.userService.get(model.email,'email')
+        const result=await this.userService.generateToken(userData,model.password)
         if(result==null) {
           res.status(400).json(RepositoryDTO.Error(400,"Mật khẩu hoặc email sai"))
           return
@@ -31,7 +28,7 @@ export default class AuthController{
         res.status(200).json(RepositoryDTO.WithData(200,userData))
     }catch(error:any){
         console.log(error)
-        res.status(500).json(error)
+        next(error)
     }
   }
   @AutoBind
@@ -53,12 +50,12 @@ export default class AuthController{
     @AutoBind
     async register (req:Request,res:Response,next:NextFunction){
     try{
-        const model:IUserModel=req.body
-        this.userService.create(model)
-        res.status(200).json(RepositoryDTO.Success("Tạo tài khoản người chơi thành công"))
+        const model:UserModel=req.body
+        const data = await this.userService.create(model)
+        res.status(200).json(RepositoryDTO.WithData(200,data))
     }catch(error:any){
         console.log(error);
-        res.status(500).json(error)
+        next(error)
     }
 }
 }

@@ -1,118 +1,79 @@
 import { NextFunction,Request,Response } from "express";
-import dataService from "../Service/DataService";
 import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
-import dataController from "./DataController";
-import {  IDataDeleteModel } from "../Model/dataModel";
-import dataSource from "../DataSource";
-import { User } from "../Data/User";
-import { IPasswordModel, IUserUpdateModel } from "../Model/UserModel";
-import { bcrypt } from 'bcryptjs';
+import { PasswordModel, UserUpdateModel } from "../Model/UserModel";
 import { AuthRequest } from "../Middlewares/Auth";
+import UserService from "../Service/UserService";
+import { AutoBind } from "../utils/AutoBind";
 
-const getAllWithFilterAndPagination=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
-    try{
-        const {page,pageSize,orderBy,sort}=req.query;
-        const pageNumber = Number(page) || 1;
-        const pageSizeNumber = Number(pageSize) || 10;
-        const orderByField=orderBy as string;
-        const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";  // Đảm bảo sortOrder có giá trị hợp lệ
-        let queryBuilder =(await dataService.getBuilderQuery(User))
-        if(orderByField){
-            queryBuilder=queryBuilder.orderBy(`user.${orderByField}`,sortOrder)
-        }
-        const data=await dataService.getAllPagination(User,queryBuilder,pageNumber,pageSizeNumber)
-        res.status(200).json(RepositoryDTO.WithData(200,data))
-        
-    }catch(error:any){
-        console.log(error)
-        res.status(500).json(error)
+export default class UserController{
+    protected userService:UserService
+    constructor(){
+        this.userService = new UserService()
     }
-
-}
-const get=async(req:Request,res:Response,next:NextFunction):Promise<void> =>{
-    try{
-        const id=Number(req.params.id);
-        const record=await dataService.getBy(User,"user",id);
-        if(await dataController.IsNotFound(res,record,"Không tìm thấy người dùng này"))return
-        res.status(200).json(RepositoryDTO.WithData(200,record))
-    }catch(error:any){
-        console.log(error)
-        res.status(500).json(error)
-    }
-
-}
-const removeArray=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
-    try{
-        const model:IDataDeleteModel=req.body;
-        const records=await dataService.getByArray(User,"user",model.ids);
-        if(await dataController.IsNotFoundArray(res,records,"Không tìm thấy người dùng này")) return
-        await dataSource.manager.transaction(async(transactionEntityManager)=>{
-            await dataService.removeArray(User,model.ids,transactionEntityManager)
-        })
-        res.status(200).json(RepositoryDTO.Success("Xóa người dùng này thành công"))
-     }catch(error:any){
-         console.log(error)
-         res.status(500).json(error)
-     }
-}
-const remove=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
-    try{
-       const id=Number(req.params.id)
-       const record=await dataService.getBy(User,"user",id);
-       if(await dataController.IsNotFound(res,record,"Không tìm thấy người dùng này"))return
-       await dataService.remove(User,record)
-       res.status(200).json(RepositoryDTO.Success("Xóa người dùng  thành công"))
-    }catch(error:any){
-        console.log(error)
-        res.status(500).json(error)
-    }
-
-}
-const update=async(req:AuthRequest,res:Response,next:NextFunction):Promise<void>=>{
-    try{
-        const id=req._id
-        const model:IUserUpdateModel=req.body;
-        const record=await dataService.getBy(User,"user",id);
-        if(await dataController.IsNotFound(res,record,"Không tìm thấy người dùng  này")) return
-        // Tạo đối tượng từ request body
-        await dataService.update(User,record,{
-            username:model.username,
-            phone:model.phone
-        })
-        res.status(200).json("Cập nhập người dùng thành công")
-    }catch(error:any){
-        console.log(error)
-        res.status(500).json(error)
-    }
-
-}
-const updatePassword= async (req:AuthRequest,res:Response,next:NextFunction):Promise<void>=>{
-        const id=req._id
-        const model:IPasswordModel=req.body;
-        const record=await dataService.getBy(User,"user",id);
-        if(await dataController.IsNotFound(res,record,"Không tìm thấy người dùng  này")) return
-        const isMatch:boolean= await bcrypt.compare(model.oldPassword,record.password_hash);
-        if(!isMatch){
-            res.status(400).json(RepositoryDTO.Error(400,"nhập mật khẩu sai"))
-            return
+    @AutoBind
+    async getAllWithFilterAndPagination(req:Request,res:Response,next:NextFunction):Promise<void>{
+        try{
+            const {page,pageSize,orderBy,sort}=req.query;
+            const pageNumber = Number(page) || 1;
+            const pageSizeNumber = Number(pageSize) || 10;
+            const orderByField=orderBy as string;
+            const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";  // Đảm bảo sortOrder có giá trị hợp lệ
+            const data=await this.userService.getFillter(orderByField,sortOrder,pageNumber,pageSizeNumber)
+            res.status(200).json(RepositoryDTO.WithData(200,data))
+            
+        }catch(error:any){
+            console.log(error)
+            next(error)
         }
-        if(model.oldPassword==model.newPassword){
-            res.status(400).json(RepositoryDTO.Error(400,"Mật khẩu mới trùng với mật khẩu củ"))
-            return
+    
+    }
+    @AutoBind
+    async get(req:Request,res:Response,next:NextFunction):Promise<void> {
+        try{
+            const id=Number(req.params.id);
+            const record = await this.userService.get(id)
+            res.status(200).json(RepositoryDTO.WithData(200,record))
+        }catch(error:any){
+            console.log(error)
+            next(error)
         }
-        if(model.newPassword!=model.confirmPassword){
-            res.status(400).json(RepositoryDTO.Error(400,"Mật khẩu xác nhận không trùng với mật khẩu mới"))
-            return
+    
+    }
+    @AutoBind
+    async update(req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
+        try{
+            const id=req._id
+            const model:UserUpdateModel=req.body;
+            await this.userService.update(id,model)
+            res.status(200).json(RepositoryDTO.Success("Cập nhập người dùng thành công"))
+        }catch(error:any){
+            console.log(error)
+            next(error)
         }
-        // Tạo đối tượng từ request body
-        const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(model.newPassword, salt);
-        await dataService.update(User,record,{
-            password_hash:hash
-        })
-        res.status(200).json("Cập nhập người dùng thành công")
+    
+    }
+    @AutoBind
+    async updatePassword (req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
+            try{
+                const id=req._id
+                const model:PasswordModel=req.body;
+                await this.userService.updatePassword(id,model)
+            res.status(200).json(RepositoryDTO.Success("Cập nhập người dùng thành công"))
+            }catch(error:any){
+                console.log(error)
+                next(error)
+            }
+    }
+    @AutoBind
+    async userGetMy(req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
+        try{
+            const id=req._id
+            console.log(id)
+            const data = await this.userService.get(id);
+            res.status(200).json(data)
+        }catch(error:any){
+            console.log(error)
+            next(error)
+        }
+    }
 }
-const userController={
-    removeArray,get,remove,getAllWithFilterAndPagination,update,updatePassword
-}
-export default userController

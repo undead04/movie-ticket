@@ -3,16 +3,17 @@ import { IShowtimeModel } from "../Model/ShowtimeModel";
 import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
 import { IDataDeleteModel } from "../Model/dataModel";
 import ShowtimeService from './../Service/ShowtimeService';
+import { AutoBind } from "../utils/AutoBind";
 
 export default class ShowtimeController{
     showtimeService:ShowtimeService
     constructor(){
         this.showtimeService = new ShowtimeService()
     }
+    @AutoBind
     async getAllWithFilterAndPagination (req: Request, res: Response, next: NextFunction): Promise<void>  {
         try {
             const { movieId, showDate, page, pageSize,orderBy,sort } = req.query;
-    
             // Chuyển đổi các tham số từ query string
             const pageNumber = Number(page) || 1;
             const pageSizeNumber = Number(pageSize) || 10;
@@ -29,7 +30,7 @@ export default class ShowtimeController{
         }
     };
     
-    
+    @AutoBind
     async get (req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
           
@@ -42,6 +43,7 @@ export default class ShowtimeController{
         }
     
     }
+    @AutoBind
     async remove (req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
            const id=Number(req.params.id)
@@ -53,6 +55,7 @@ export default class ShowtimeController{
         }
     
     }
+    @AutoBind
     async create (req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
           
@@ -65,11 +68,12 @@ export default class ShowtimeController{
         }
     
     }
+    @AutoBind
     async update (req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
             const id=Number(req.params.id);
             const model:IShowtimeModel=req.body;
-            this.showtimeService.update(id,model)
+            await this.showtimeService.update(id,model)
              res.status(200).json(RepositoryDTO.Success("Cập nhập lịch chiếu phim thành công"))
         }catch(error:any){
             console.log(error)
@@ -77,27 +81,40 @@ export default class ShowtimeController{
         }
     
     }
+    @AutoBind
     async removeArray (req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
             const model:IDataDeleteModel=req.body;
-            this.showtimeService.removeArray(model.ids)
-            res.status(200).json(RepositoryDTO.Success("Xóa lịch chiếu phim này thành công"))
+            await this.showtimeService.removeArray(model.ids)
+            res.status(200).json(RepositoryDTO.Success("Xóa các lịch chiếu phim này thành công"))
          }catch(error:any){
              console.log(error)
              next(error)
          }
     }
+    @AutoBind
     async createArray (req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
           
             // Tạo đối tượng từ request body
             const models:IShowtimeModel[]=req.body;
-            this.showtimeService.createArray(models)
-            res.status(200).json(RepositoryDTO.Success("Tạo danh sách phim thành công thành công"))
+            await this.showtimeService.createArray(models)
+            res.status(200).json(RepositoryDTO.Success("Tạo danh sách thời gian phim thành công thành công"))
         }catch(error:any){
             console.log(error)
             next(error)
         }
     
+    }
+    @AutoBind
+    async waningDelete(req:Request,res:Response,next:NextFunction):Promise<void>{
+        try{
+            const ids = req.body.ids
+            await this.showtimeService.waningDelete(ids)
+            res.status(200).json()
+        }catch(error:any){
+            console.log(error)
+            next(error)
+        }
     }
 }

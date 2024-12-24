@@ -1,32 +1,23 @@
-import {  Response } from "express";
-import dataService from "../Service/DataService";
-import { Ticket } from "../Data/Ticket";
+import {  NextFunction, Response } from "express";
 import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
 import { AuthRequest } from "../Middlewares/Auth";
-import AppRole from "../Model/GroupRoleModel";
+import TicketService from "../Service/TicketService";
 
-const get=async(req:AuthRequest,res:Response):Promise<void>=>{
-    try{
-        const {movieId}=req.query;
-        const userId=req._id
-        const role=req.role
-        let queryBuilder=await (await dataService.getBuilderQuery(Ticket,'ticket'))
-            .leftJoinAndSelect('ticket.showtime','showtime')
-            .leftJoinAndSelect("ticket.seat",'seat')
-            .innerJoin('ticket.bill','bill')
-        
-        if(movieId){
-            queryBuilder=queryBuilder.andWhere('showtime.movieId=:movieId',{movieId})
+export default class TicketController{
+    protected ticketService:TicketService
+    constructor(){
+        this.ticketService = new TicketService()
+    }
+    async getTicket (req:AuthRequest,res:Response,next:NextFunction){
+        try{
+            const movieId = req.query.movieId;
+            const userId = req._id
+            const role = req.role
+            const data = await this. ticketService.getFillter(Number(movieId),role,userId)
+            res.status(200).json(RepositoryDTO.WithData(200,data))
+        }catch(error:any){
+            console.log(error)
+            next(error)
         }
-        if(role==AppRole.User){
-            queryBuilder=queryBuilder.andWhere('bill.userId=:value',{value:userId})
-        }
-        const data=await queryBuilder.getMany()
-        res.status(200).json(RepositoryDTO.WithData(200,data))
-    }catch(error:any){
-        console.log(error)
-        res.status(500).json(error)
     }
 }
-const ticketController={get}
-export default ticketController

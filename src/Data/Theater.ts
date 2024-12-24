@@ -6,13 +6,13 @@ export class Theater {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({type:"text", unique:true,length:50})
+  @Column({type:"nvarchar", unique:true,length:50})
   name!: string;
 
-  @Column({ type: 'text',length:50,unique:true })
+  @Column({ type: 'nvarchar',length:50,unique:true })
   address!: string;
 
-  @Column({type:"text"})
+  @Column({type:"nvarchar"})
   city!: string;
 
   @CreateDateColumn()

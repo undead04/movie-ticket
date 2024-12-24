@@ -64,8 +64,8 @@ export default  class DataService<T extends ObjectLiteral> {
       totalPages: Math.ceil(total / pageSize),
     };
   }
-  async isNotFound(id:number,message:string,statusCode:number=404,field?:string){
-    const record = await this.getBy(id)
+  async isNotFound(id:number,message:string,statusCode:number=404,field?:string, relations?: IRelationship[],){
+    const record = await this.getBy(id,'id',relations)
     if(record==null){
         throw new CustomError(message,statusCode,field)
     }
@@ -82,6 +82,7 @@ export default  class DataService<T extends ObjectLiteral> {
     value: unknown,
     columnField: string = 'id',
     relations?: IRelationship[],
+    selectFiled?:string[],
     transactionalEntityManager?: EntityManager
   ): Promise<T | null> {
     const repository = this.getRepository(transactionalEntityManager);
@@ -92,7 +93,9 @@ export default  class DataService<T extends ObjectLiteral> {
         queryBuilder.leftJoinAndSelect(relation.original, relation.link);
       });
     }
-
+    if(selectFiled){
+      queryBuilder.select(selectFiled)
+    }
     queryBuilder.where(`${this.alias}.${columnField} = :value`, { value });
     return queryBuilder.getOne();
   }
@@ -140,7 +143,7 @@ export default  class DataService<T extends ObjectLiteral> {
     transactionalEntityManager?: EntityManager
   ): Promise<T> {
     const repository = this.getRepository(transactionalEntityManager);
-    const existingRecord = await this.getBy(id,'id',null,transactionalEntityManager)
+    const existingRecord = await this.getBy(id,'id',null,null,transactionalEntityManager)
     if(existingRecord){
       await repository.update(id, data as QueryDeepPartialEntity<T>);
       return existingRecord;
@@ -153,7 +156,7 @@ export default  class DataService<T extends ObjectLiteral> {
     transactionalEntityManager?: EntityManager
   ): Promise<void> {
     const repository = this.getRepository(transactionalEntityManager);
-    const record =await this.getBy(id,'id',null,transactionalEntityManager)
+    const record =await this.getBy(id,'id',null,null,transactionalEntityManager)
     if(record){
       await repository.remove(record);
     }

@@ -1,6 +1,4 @@
 import { IsDate, IsIn, IsInt, IsNotEmpty, IsPositive, IsString, Max, MaxLength, Min } from "class-validator";
-import { Movie } from "../Data/Movie";
-import { Genre } from "../Data/Genre";
 
 export interface IMovieModel{
    title: string;

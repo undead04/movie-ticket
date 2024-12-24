@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ClassConstructor, plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
 import { AutoBind } from "../utils/AutoBind";
+import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
 
 // Define a type for class constructors
 
@@ -18,9 +19,11 @@ export default class ValidateErrorMiddleware<T extends Object> {
   async ValidateError(req: Request, res: Response, next: NextFunction): Promise<void> {
     const model = req.body
     if(Array.isArray(model)){
-      await Promise.all(model.map(async(item) => this.HandleValidate(res,item)))
+      for(const item of model){
+        if(await this.HandleValidate(res,item)) return
+      }
     }else{
-      await this.HandleValidate(res,model)
+      if(await this.HandleValidate(res,model)) return
     }
     next()
   }
@@ -32,14 +35,13 @@ export default class ValidateErrorMiddleware<T extends Object> {
 
     if (errors.length > 0) {
       // If there are validation errors, respond with status 400
-      res.status(400).json({
-        error: errors.reduce((acc, error) => {
-          acc[error.property] = Object.values(error.constraints)[0]; // Get the first validation error
-          return acc;
-        }, {}),
-      });
-      return; // Stop further processing
+      res.status(400).json(RepositoryDTO.Error(400,errors.reduce((acc, error) => {
+        acc[error.property] = Object.values(error.constraints)[0]; // Get the first validation error
+        return acc;
+      }, {}),));
+      return true; // Stop further processing
     }
+    return false;
 
     // If there are no validation errors, call the next middleware
     

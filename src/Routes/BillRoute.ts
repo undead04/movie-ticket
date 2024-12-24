@@ -1,14 +1,29 @@
 import express from 'express';
-import billController from '../Controllers/BillController';
 import { authenticateToken } from '../Middlewares/Auth';
+import BillController from '../Controllers/BillController';
+import ValidateErrorMiddleware from '../Middlewares/ValidateErrorMiddlware';
+import ValidatorNotFoundMiddlewares from '../Middlewares/ValidatorNotFoundMiddlewares';
+import { Bill } from '../Data/Bill';
+import { BillModel, BillUpdateModel } from '../Model/BillModel';
 
 const router = express.Router();
-
+const billController = new BillController()
+const validateError= new ValidateErrorMiddleware(BillModel)
+const validateUpdateBill = new ValidateErrorMiddleware(BillUpdateModel)
+const validatorNotFound=new ValidatorNotFoundMiddlewares(Bill,'bill',"Không tìm thấy hóa đơn này này")
 // Lấy tất cả genres với filter và phân trang
-router.get('/', authenticateToken,billController.getAllWithFilterAndPagination);
-router.get("/:id",authenticateToken,billController.get)
-router.post("/",authenticateToken,billController.create)
-router.delete("/:id",billController.remove)
-router.put('/:id',authenticateToken,billController.update)
+router.get('/', authenticateToken(),billController.getAllWithFilterAndPagination);
+
+router.post("/"
+    ,authenticateToken()
+    ,validateError.ValidateError
+    ,billController.create)
+router.delete("/:id"
+    ,validatorNotFound.IsNotFound
+    ,billController.remove)
+router.put('/:id',authenticateToken()
+    ,validatorNotFound.IsNotFound,
+    validateUpdateBill.ValidateError
+    ,billController.update)
 
 export default router;

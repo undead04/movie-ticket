@@ -1,11 +1,11 @@
 import express from 'express';
-import billController from '../Controllers/BillController';
 import { authenticateToken } from '../Middlewares/Auth';
-import ticketController from '../Controllers/TicketController';
+
+import TicketController from '../Controllers/TicketController';
 
 const router = express.Router();
-
+const ticketController = new TicketController()
 // Lấy tất cả genres với filter và phân trang
-router.get('/', authenticateToken,ticketController.get);
+router.get('/', authenticateToken(),ticketController.getTicket);
 
 export default router;

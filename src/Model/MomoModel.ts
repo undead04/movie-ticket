@@ -1,10 +1,10 @@
 
-export interface IMomoModel{
-    orderCode:string,
-    totalPrice:number,
-    orderInfo:string,
+export class MomoModel{
+    orderCode:string
+    totalPrice:number
+    orderInfo:string
 }
-export interface ITransactionStatus{
+export class ITransactionStatus{
         
         orderCode: string
         

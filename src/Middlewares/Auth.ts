@@ -1,22 +1,42 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-export interface AuthRequest extends Request{
-  _id?:number,
-  role:string
+import { RepositoryDTO } from '../Model/DTO/RepositoryDTO';
+
+export interface AuthRequest extends Request {
+  _id?: number;
+  role: string;
 }
-// Middleware kiểm tra xác thực
-export const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction):Promise<void> => {
-  const token = req.cookies.authToken; // Lấy token từ cookies
-  if (!token){
-    res.sendStatus(401); return // Nếu không có token thì từ chối truy cập
-  }
-  jwt.verify(token,'authToken', (err:any, user:any) => {
-    if (err) {
-      res.sendStatus(403); // Nếu token không hợp lệ
-      return
+
+// Middleware kiểm tra xác thực và vai trò
+export const authenticateToken = (roles?: string[]) => {
+  return (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    const token = req.cookies.authToken; // Lấy token từ cookies
+
+    if (!token) {
+      res.status(401).json(RepositoryDTO.Error(401,"Không có token")); // Nếu không có token thì từ chối truy cập
+      return;
     }
-    req._id=user.id,
-    req.role=user.role,
-    next(); // Tiếp tục xử lý yêu cầu
-  });
+
+    jwt.verify(token, 'authToken', (err: any, user: any) => {
+      if (err) {
+        if (err.name === 'TokenExpiredError') {
+          res.status(401).json(RepositoryDTO.Error(401,"Token hết hạn")) // Token hết hạn
+          return
+        }
+        res.status(403).json(RepositoryDTO.Error(403,"Token không hợp lệ")); // Nếu token không hợp lệ
+        return;
+      }
+
+      req._id = user.id;
+      req.role = user.role;
+      // Kiểm tra vai trò của người dùng
+      if (roles.length>0 && !roles.includes(user.role)) {
+
+        res.status(403).json(RepositoryDTO.Error(403,"Bạn không đủ quyền hạn đề vào API này")); // Nếu người dùng không có quyền
+        return;
+      }
+
+      next(); // Tiếp tục xử lý yêu cầu nếu vai trò hợp lệ
+    });
+  };
 };

@@ -1,11 +1,15 @@
+import { ArrayNotEmpty, IsInt, IsNotEmpty } from "class-validator";
 
-export interface IBillModel{
-    totalPrice:number
-    expiration_time:Date
-    seatId:number[],
-    showtimeId:number,
+export class BillModel{
+    @IsNotEmpty()
+    @ArrayNotEmpty()
+    seatId:number[];
+    @IsNotEmpty()
+    @IsInt()
+    showtimeId:number;
 }
-export interface IBillUpdateModel{
+export class BillUpdateModel{
+    @IsNotEmpty()
     statusOrder:StatusOrder
 }
 export enum StatusOrder{

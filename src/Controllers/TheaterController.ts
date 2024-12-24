@@ -2,7 +2,6 @@ import { NextFunction,Request,Response } from "express";
 import { ITheaterModel } from "../Model/TheaterModel";
 import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
 import { IDataDeleteModel } from "../Model/dataModel";
-import dataSource from "../DataSource";
 import TheaterService from "../Service/TheaterService";
 import { AutoBind } from "../utils/AutoBind";
 
@@ -27,7 +26,7 @@ export default class TheaterController{
             
         }catch(error:any){
             console.log(error)
-            res.status(500).json(error)
+            next(error)
         }
     
     }
@@ -35,11 +34,11 @@ export default class TheaterController{
     async get (req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
             const id=Number(req.params.id);
-            const data = await this.theaterService.getBy(id)
+            const data = await this.theaterService.get(id)
             res.status(200).json(RepositoryDTO.WithData(200,data))
         }catch(error:any){
             console.log(error)
-            res.status(500).json(error)
+            next(error)
         }
     
     }
@@ -52,7 +51,7 @@ export default class TheaterController{
            res.status(200).json(RepositoryDTO.Success("Xóa rap chiếu phim này thành công phim thành công"))
         }catch(error:any){
             console.log(error)
-            res.status(500).json(error)
+            next(error)
         }
     
     }
@@ -64,7 +63,7 @@ export default class TheaterController{
             res.status(200).json(RepositoryDTO.Success("Tạo rạp chiếu phim thành công"))
         }catch(error:any){
             console.log(error)
-            res.status(500).json(error)
+            next(error)
         }
     
     }
@@ -77,7 +76,7 @@ export default class TheaterController{
              res.status(200).json(RepositoryDTO.Success("Cập nhập rạp chiếu phim thành công"))
         }catch(error:any){
             console.log(error)
-            res.status(500).json(error)
+            next(error)
         }
     
     }
@@ -85,13 +84,11 @@ export default class TheaterController{
     async removeArray (req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
             const model:IDataDeleteModel=req.body;
-            await dataSource.manager.transaction(async (transactionEntityManager)=>{
-                await this.theaterService.removeArray(model.ids,transactionEntityManager)
-            })
+            await this.theaterService.removeArray(model.ids)
             res.status(200).json(RepositoryDTO.Success("Xóa các rạp chiếu phim này thành công"))
          }catch(error:any){
              console.log(error)
-             res.status(500).json(error)
+             next(error)
          }
     }
     @AutoBind
@@ -100,14 +97,23 @@ export default class TheaterController{
           
             // Tạo đối tượng từ request body
             const models:ITheaterModel[]=req.body;
-            await dataSource.manager.transaction(async (transactionEntityManager)=>{
-                await this.theaterService.createArray(models,transactionEntityManager)
-            })
+            await this.theaterService.createArray(models)
              res.status(200).json(RepositoryDTO.Success("Tạo danh sách rạp chiếu phim thành công thành công"))
         }catch(error:any){
             console.log(error)
-            res.status(500).json(error)
+            next(error)
         }
     
+    }
+    @AutoBind
+    async waningDelete(req:Request,res:Response,next:NextFunction):Promise<void>{
+        try{
+            const ids = req.body.ids
+            await this.theaterService.waningDelete(ids)
+            res.status(200).json()
+        }catch(error:any){
+            console.log(error)
+            next(error)
+        }
     }
 }

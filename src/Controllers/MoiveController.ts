@@ -4,6 +4,7 @@ import { parseStatusMovie } from "../utils/ConverEnum";
 import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
 import { IDataDeleteModel } from "../Model/dataModel";
 import MovieService from "../Service/MovieService";
+import { AutoBind } from "../utils/AutoBind";
 
 export  enum StatusMovie{
     noStatus=0,
@@ -17,6 +18,7 @@ export default class MovieController{
     constructor(){
         this.movieService = new MovieService()
     }
+    @AutoBind
     async getAllWithFilterAndPagination(req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
             const { title, genreId,orderBy,sort, statusMovie,page, pageSize } = req.query;
@@ -33,9 +35,10 @@ export default class MovieController{
             res.status(200).json(RepositoryDTO.WithData(200,data));
         }catch(error:any){
             console.log(error)
-            res.status(500).json(error)
+           next(error)
         }
     }
+    @AutoBind
     async get (req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
           
@@ -44,65 +47,81 @@ export default class MovieController{
             res.status(200).json(RepositoryDTO.WithData(200,data))
         }catch(error:any){
             console.log(error)
-            res.status(500).json(error)
+           next(error)
         }
     
     }
+    @AutoBind
     async remove (req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
             const id:number = Number(req.params.id)
-           this.movieService.remove(id)
+           await this.movieService.remove(id)
             res.status(200).json(RepositoryDTO.Success("Xóa phim thành công"))
         }catch(error:any){
             console.log(error)
-            res.status(500).json(error)
+           next(error)
         }
     
     }
+    @AutoBind
     async create (req:Request,res:Response,next:NextFunction):Promise<void> {
         try{
             const model:IMovieModel=req.body;
-            this.movieService.create(model)
+            await this.movieService.create(model)
             res.status(200).json(RepositoryDTO.Success("Tạo phim thành công"))
         }catch(error:any){
             console.log(error)
-            res.status(500).json(error)
+           next(error)
         }
     
     }
+    @AutoBind
     async update (req:Request,res:Response,next:NextFunction):Promise<void> {
         try{
             const id=Number(req.params.id);
             const model:IMovieModel=req.body;
-            this.movieService.update(id,model)
+            await this.movieService.update(id,model)
             res.status(200).json(RepositoryDTO.Success("Cập nhập phim thành công"))
         }catch(error:any){
             console.log(error)
-            res.status(500).json(error)
+           next(error)
         }
     
     }
+    @AutoBind
     async removeArray (req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
             const model:IDataDeleteModel=req.body;
-            this.movieService.removeArray(model.ids)
-            res.status(200).json(RepositoryDTO.Success("Xóa phim này thành công"))
+            await this.movieService.removeArray(model.ids)
+            res.status(200).json(RepositoryDTO.Success("Xóa các phim này thành công"))
          }catch(error:any){
              console.log(error)
-             res.status(500).json(error)
+            next(error)
          }
     }
+    @AutoBind
     async createArray (req:Request,res:Response,next:NextFunction):Promise<void> {
         try{
           
             // Tạo đối tượng từ request body
             const models:IMovieModel[]=req.body;
-            this.movieService.createArray(models)
-            res.status(200).json(RepositoryDTO.Success("Tạo danh sách  phim thành công thành công"))
+            await this.movieService.createArray(models)
+            res.status(200).json(RepositoryDTO.Success("Tạo danh sách phim thành công thành công"))
         }catch(error:any){
             console.log(error)
-            res.status(500).json(error)
+           next(error)
         }
     
+    }
+    @AutoBind
+    async waningDelete(req:Request,res:Response,next:NextFunction):Promise<void>{
+        try{
+            const ids = req.body.ids
+            await this.movieService.waningDelete(ids)
+            res.status(200).json()
+        }catch(error:any){
+            console.log(error)
+            next(error)
+        }
     }
 }

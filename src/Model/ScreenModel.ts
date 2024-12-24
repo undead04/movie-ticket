@@ -1,6 +1,4 @@
 import { IsInt, IsNotEmpty, IsPositive, IsString, Max, MaxLength } from "class-validator";
-import { Unique } from "typeorm";
-
 export interface IScreenModel{
     seatCapacity:number,
     name:string,

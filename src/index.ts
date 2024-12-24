@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import "reflect-metadata";  // Import reflect-metadata trước khi sử dụng TypeORM
 import dataSource from './DataSource';
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from './swaggerconfig';
 import genreRouter from './Routes/GenreRoute'
 import movieRouter from "./Routes/MovieRoute"
 import theaterRouter from './Routes/TheaterRoute'
@@ -16,7 +18,10 @@ import authRoute from './Routes/AuthRoute'
 import paymentRoute from './Routes/PaymentRoute'
 import billRoute from './Routes/BillRoute'
 import ticketRoute from './Routes/TicketRoute'
+import userRouter from './Routes/UserRoute'
+import statisticalRoute from './Routes/StatisticalRoute'
 import { errorHandler } from './Middlewares/ErrorHandle';
+
 // Load environment variables from .env file
 dotenv.config();
 // set up cookies
@@ -34,24 +39,30 @@ const app = express();
 app.use(cookieParser())
 // Sử dụng body-parser để xử lý dữ liệu JSON
 app.use(bodyParser.json());
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 //
 // Định nghĩa một route ví 
 app.use(express.json()); // Đảm bảo rằng middleware này có mặt
 app.use("/api/genre",genreRouter)
-//app.use("/api/movie",movieRouter)
-//app.use("/api/theater",theaterRouter)
-//app.use("/api/screen",screenRouter)
-//app.use("/api/seat",seatRoute)
-//app.use("/api/showtime",showtimeRoute)
-//app.use("/api/review",reviewRoute)
+app.use("/api/movie",movieRouter)
+app.use("/api/theater",theaterRouter)
+app.use("/api/screen",screenRouter)
+app.use("/api/seat",seatRoute)
+app.use("/api/showtime",showtimeRoute)
+app.use("/api/review",reviewRoute)
 app.use("/api",authRoute)
-//app.use("/api/payment",paymentRoute)
-//app.use('/api/bill',billRoute)
-//app.use('/api/groupRole',groupRoleRoute)
-//app.use('/api/ticket',ticketRoute)
+app.use("/api/payment",paymentRoute)
+app.use('/api/bill',billRoute) 
+app.use('/api/groupRole',groupRoleRoute)
+app.use('/api/ticket',ticketRoute)
+app.use("/api/user",userRouter)
+app.use('/api/statistical',statisticalRoute)
 // Bắt đầu 
 app.use(errorHandler)
+// Middleware Swagger để hiển thị tài liệu API
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
 });
+ 
