@@ -25,5 +25,9 @@ router.put('/:id',authenticateToken()
     ,validatorNotFound.IsNotFound,
     validateUpdateBill.ValidateError
     ,billController.update)
-
+router.get('/:id',
+    authenticateToken()
+    ,validatorNotFound.IsNotFound
+    ,billController.get
+)
 export default router;

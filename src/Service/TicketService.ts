@@ -8,11 +8,16 @@ export default class TicketService{
     constructor(){
         this.ticketRepository = new DataService(Ticket,'ticket')
     }
-    async getFillter(movieId:number,role:string,userId:number){
+    async getFillter(billId:number,movieId:number,role:string,userId:number){
         let queryBuilder = (await this.ticketRepository.createQueryBuilder())
         .leftJoinAndSelect('ticket.showtime','showtime')
         .leftJoinAndSelect('ticket.bill','bill')
-        .andWhere('showtime.movieId =:movieId',{movieId})
+        if(billId){
+            queryBuilder = queryBuilder.andWhere('ticket.billId =:billId',{billId})
+        }
+        if(movieId){
+            queryBuilder = queryBuilder.andWhere('showtime.movieId=:movieId',{movieId})
+        }
         if(role==AppRole.User){
              queryBuilder=queryBuilder.andWhere('bill.userId=:value',{value:userId})
         }

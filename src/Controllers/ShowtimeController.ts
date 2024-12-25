@@ -4,6 +4,7 @@ import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
 import { IDataDeleteModel } from "../Model/dataModel";
 import ShowtimeService from './../Service/ShowtimeService';
 import { AutoBind } from "../utils/AutoBind";
+import { parseNumber } from "../utils/ConverEnum";
 
 export default class ShowtimeController{
     showtimeService:ShowtimeService
@@ -13,7 +14,7 @@ export default class ShowtimeController{
     @AutoBind
     async getAllWithFilterAndPagination (req: Request, res: Response, next: NextFunction): Promise<void>  {
         try {
-            const { movieId, showDate, page, pageSize,orderBy,sort } = req.query;
+            const { movieId, showDate, screenId,page, pageSize,orderBy,sort } = req.query;
             // Chuyển đổi các tham số từ query string
             const pageNumber = Number(page) || 1;
             const pageSizeNumber = Number(pageSize) || 10;
@@ -21,7 +22,8 @@ export default class ShowtimeController{
             const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";
             const showDateString = showDate as string
             const movieNumebr = Number(movieId)
-            const data = await this.showtimeService.getFillter(showDateString,movieNumebr,orderByField,sortOrder,pageNumber,pageSizeNumber)
+            const screenIdNumner = parseNumber(screenId)
+            const data = await this.showtimeService.getFillter(showDateString,movieNumebr,screenIdNumner,orderByField,sortOrder,pageNumber,pageSizeNumber)
             res.status(200).json(RepositoryDTO.WithData(200,data));
     
         } catch (error: any) {

@@ -98,10 +98,9 @@ export default class ReviewService{
         if(IsDuplicatesWithSort(ids)){
             throw new CustomError(`Trong req.body có hai id trùng nhau`,404)
         } 
+        await Promise.all(ids.map(async(id)=>await this.validateReview(id)))
         await dataSource.manager.transaction(async(transactionEntityManager)=>{
-            for(const id of ids){
-                await this.remove(id,transactionEntityManager)
-            }
+            this.reviewRepository.removeArray(ids,transactionEntityManager)
         })
     }
     async update(id:number,data:DeepPartial<Review>):Promise<void>{

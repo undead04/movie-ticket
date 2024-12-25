@@ -26,4 +26,13 @@ export function parseDate(value: any): Date | null {
     }
     return date;
 }
-
+export function getHour(value:Date):string{
+     // Chuyển 'startTime' sang dạng 'HH:mm:ss'
+     const startTime = new Date(value).toISOString().slice(11, 19); // Lấy phần thời gian (HH:mm:ss)
+     return startTime
+}
+export function getDate(value:Date):string{
+    // Chuyển 'showDate' sang ISO string và lấy phần ngày (yyyy-mm-dd)
+    const showDateISO = new Date(value).toISOString().split('T')[0]; // Lấy phần ngày 'yyyy-mm-dd'
+    return showDateISO
+}

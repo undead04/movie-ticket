@@ -4,6 +4,7 @@ import { PasswordModel, UserUpdateModel } from "../Model/UserModel";
 import { AuthRequest } from "../Middlewares/Auth";
 import UserService from "../Service/UserService";
 import { AutoBind } from "../utils/AutoBind";
+import { parseString } from "../utils/ConverEnum";
 
 export default class UserController{
     protected userService:UserService
@@ -13,12 +14,13 @@ export default class UserController{
     @AutoBind
     async getAllWithFilterAndPagination(req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
-            const {page,pageSize,orderBy,sort}=req.query;
+            const {email,page,pageSize,orderBy,sort}=req.query;
             const pageNumber = Number(page) || 1;
             const pageSizeNumber = Number(pageSize) || 10;
             const orderByField=orderBy as string;
+            const emailString = parseString(email)
             const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";  // Đảm bảo sortOrder có giá trị hợp lệ
-            const data=await this.userService.getFillter(orderByField,sortOrder,pageNumber,pageSizeNumber)
+            const data=await this.userService.getFillter(emailString,orderByField,sortOrder,pageNumber,pageSizeNumber)
             res.status(200).json(RepositoryDTO.WithData(200,data))
             
         }catch(error:any){

@@ -74,25 +74,25 @@ export default class ScreenServie{
         if(IsDuplicatesWithSort(arrayName)){
             throw new CustomError(`Tạo phòng chiếu phim thất bại vì có model trùng tên`,400)
         }
+        await Promise.all(datas.map(async(data)=>{
+            await this.validate(0,data)
+        }))
         await dataSource.manager.transaction(async(transactionEntityManager)=>{
-            for(const data of datas){
-                await this.create(data,transactionEntityManager)
-            }
+            this.screenRepository.createArray(datas,transactionEntityManager)
         })
         
     }
-    async remove(id: number, transactionalEntityManager?: EntityManager): Promise<void> {
+    async remove(id: number): Promise<void> {
         await this.validateScreen(id)
-        await this.screenRepository.remove(id,transactionalEntityManager)
+        await this.screenRepository.remove(id)
     }
     async removeArray(ids:number[]){
         if(IsDuplicatesWithSort(ids)){
             throw new CustomError(`Trong req.body có hai id trùng nhau`,400)
         } 
+        await Promise.all(ids.map(async(id)=>await this.validateScreen(id)))
         await dataSource.manager.transaction(async(transactionEntityManager)=>{
-            for(const id of ids){
-                await this.remove(id,transactionEntityManager)
-            }
+            this.screenRepository.removeArray(ids,transactionEntityManager)
         })
     }
     async update(id: number, data: DeepPartial<Screen>): Promise<Screen> {

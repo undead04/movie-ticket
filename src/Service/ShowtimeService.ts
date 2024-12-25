@@ -23,7 +23,7 @@ export default class ShowtimeService{
             original:"showtime.screen",link:"screen"
         }])
     }
-    async getFillter(showDate?:string,movieId?:number,orderBy?:string,sort?:string,page:number=1,pageSize:number=10){
+    async getFillter(showDate?:string,movieId?:number,screenId?:number,orderBy?:string,sort?:string,page:number=1,pageSize:number=10){
         const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";
         // Tạo QueryBuilder cho Showtime
         let queryBuilder = await this.showtimeRepository.createQueryBuilder()
@@ -32,11 +32,15 @@ export default class ShowtimeService{
                                    .leftJoinAndSelect('showtime.screen', 'screen');
         // Thêm điều kiện lọc theo movieId nếu có
         if (movieId) {
-            queryBuilder = queryBuilder.where("showtime.movieId = :movieId", { movieId });
+            queryBuilder = queryBuilder.andWhere("showtime.movieId = :movieId", { movieId });
         }
         // Thêm điều kiện lọc theo showDate nếu có
         if (showDate) {
             queryBuilder = queryBuilder.andWhere('showtime.showDate = :showDate', { showDate});
+        }
+        if(screenId){
+            console.log(screenId)
+            queryBuilder = queryBuilder.andWhere('showtime.screenId=:screenId',{screenId})
         }
         if(orderBy){
             queryBuilder=queryBuilder.orderBy(`showtime.${orderBy}`,sortOrder)
@@ -58,13 +62,8 @@ export default class ShowtimeService{
     protected async isUnique(data: IShowtimeModel) {
         // Chuyển 'showDate' sang ISO string và lấy phần ngày (yyyy-mm-dd)
         const showDateISO = new Date(data.showDate).toISOString().split('T')[0]; // Lấy phần ngày 'yyyy-mm-dd'
-        
         // Chuyển 'startTime' sang dạng 'HH:mm:ss'
         const startTime = new Date(data.startTime).toISOString().slice(11, 19); // Lấy phần thời gian (HH:mm:ss)
-        
-        console.log('showDate:', showDateISO);
-        console.log('startTime:', startTime);
-    
         // Truy vấn cơ sở dữ liệu
         const record = await (await this.showtimeRepository
             .createQueryBuilder())
@@ -97,7 +96,10 @@ export default class ShowtimeService{
         // Kiểm tra tên có trùng hay không
         const record = await this.isUnique(data);
         if (record && record.id != id) {
-          throw new CustomError(`Thời gian chiếu phim ${record.startTime} tại phòng ${recordScreen.name} đã bị trùng lịch`, 400,'name');
+          throw new CustomError(`Thời gian chiếu phim ${record.startTime} tại phòng ${recordScreen.name} đã bị trùng lịch`, 400,'startTime');
+        }
+        if(data.startTime > data.endTime){
+            throw new CustomError(`Thời gian khởi chiếu không đc lớn hơn thời gian kết thúc`,400,'startTime')
         }
       }      
     async create(data: IShowtimeModel): Promise<void> {
@@ -119,9 +121,17 @@ export default class ShowtimeService{
         if(isModuleNamespaceObject(arrayData)){
             throw new CustomError(`Tạo thời gian chiếu phim thất bại vì có model trùng`,400)
         }
-        for(const data of datas){
-            await this.create(data)
-        }
+        await Promise.all(datas.map(async(data)=>{
+            await this.validate(0,data)
+        }))
+        await dataSource.manager.transaction(async(transactionEntityManager)=>{
+            const datasModel = datas.map((data)=>({
+                    ...data,
+                    screen:{id:data.screenId},
+                    movie:{id:data.movieId}
+            }))
+            this.showtimeRepository.createArray(datasModel,transactionEntityManager)
+        })
       }
     async remove(id:number,transactionEntityManager?:EntityManager){
         await this.validateShowtime(id)
@@ -139,10 +149,9 @@ export default class ShowtimeService{
         if(IsDuplicatesWithSort(ids)){
             throw new CustomError(`Trong req.body có hai id trùng nhau`,404)
         } 
+        await Promise.all(ids.map(async(id)=>await this.validateShowtime(id)))
         await dataSource.manager.transaction(async(transactionEntityManager)=>{
-            for(const id of ids){
-                await this.remove(id,transactionEntityManager)
-            }
+            this.showtimeRepository.removeArray(ids,transactionEntityManager)
         })
     }
     async waningDelete(ids:number[]){

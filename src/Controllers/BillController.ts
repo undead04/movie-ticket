@@ -49,6 +49,7 @@ export default class BillController{
     async create(req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
         try{
           const model:BillModel = req.body
+        
           const userId = req._id
           const dataBill = await this.billService.create(userId,model)
           res.status(200).json(RepositoryDTO.WithData(200,dataBill))
@@ -65,6 +66,19 @@ export default class BillController{
           const id=Number(req.params.id);
           await this.billService.update(id,model)
           res.status(200).json(RepositoryDTO.Success("Cập nhập thành công hóa đơn"))
+             
+        }catch(error:any){
+            console.log(error)
+            next(error)
+        }
+    
+    }
+    @AutoBind
+    async get (req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
+        try{
+            const id =Number(req.params.id)
+          const data =await this.billService.getId(id)
+          res.status(200).json(RepositoryDTO.WithData(200,data))
              
         }catch(error:any){
             console.log(error)

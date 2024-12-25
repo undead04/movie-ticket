@@ -25,6 +25,31 @@ export default class BillService{
     async getBillCode(orderCode:string):Promise<Bill>{
         return this.billRepository.getBy(orderCode,'orderCode')
     }
+    async getId(id:number){
+        const billData = await this.billRepository.getBy(id)
+        const ticketData = await (await this.ticketRepository
+        .createQueryBuilder())
+        .innerJoin('ticket.bill','bill')
+        .innerJoin('ticket.showtime', 'showtime')
+        .innerJoin('showtime.screen', 'screen')
+        .innerJoin('ticket.seat', 'seat')
+        .andWhere('bill.id = :id', { id })
+        .select([
+            'ticket.id',
+            'showtime.showDate',      
+            'showtime.price',
+            'showtime.startTime',
+            'showtime.endTime',
+            'screen.name',     
+            'seat.seatNumber',        
+        ])
+        .getRawMany();
+        const data = {
+            bill:billData,
+            ticket:ticketData
+        }
+        return data
+    }
     async getFillter(orderCode?:string,statusOrder?:number,role?:string,userId?:number,from?:string,to?:string,orderBy?:string,sort?:string,page:number=1,pageSize:number=10){
         const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";
         let queryBuilder =await (await this.billRepository.createQueryBuilder())
@@ -49,6 +74,9 @@ export default class BillService{
         if(orderBy){
             queryBuilder=queryBuilder.orderBy(`bill.${orderBy}`,sortOrder)
         }
+        queryBuilder = queryBuilder.select(['bill.id','bill.orderCode','bill.totalPrice','bill.statusOrder','bill.bookingTime'
+            ,'bill.paymentMethod','user.id','user.username'
+        ])
         const data = await this.billRepository.getPagination(queryBuilder,page,pageSize)
         return data
     }
@@ -84,9 +112,15 @@ export default class BillService{
             }
             seatRecords.push(seat)
         }
-        if(dateNow> new Date(showtimeRecord.startTime)){
-            throw new CustomError("Vượt quá thời gian cho phép đặt vế",400)
+        // Kết hợp `showDate` và `startTime` thành một `Date` đầy đủ
+        const combinedDate = `${showtimeRecord.showDate}T${showtimeRecord.startTime}`;
+        // Tạo đối tượng Date từ chuỗi kết hợp
+        const startDateTime = new Date(combinedDate);
+
+        if (dateNow > startDateTime) {
+            throw new CustomError("Vượt quá thời gian cho phép đặt vé", 400);
         }
+
         const record = await this.Unique(data)
         if(record){
             throw new CustomError(`Hiện tại đã có người khác đặt vé này`,400)

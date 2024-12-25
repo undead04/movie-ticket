@@ -21,7 +21,6 @@ export default class StatisticalController{
             const pageSizeNumber = parseNumber(pageSize)||10
             const data = await this.statisticalSerice.getFillter(
                 movieIdNumber,fromDate,toDate,theaterIdNumber,pageNumber,pageSizeNumber
-
             )
             res.status(200).json(RepositoryDTO.WithData(200,data))
         }catch(error){

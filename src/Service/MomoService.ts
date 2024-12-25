@@ -78,6 +78,7 @@ export default class MomoService{
   
   try {
     const response = await axios.post(endpoint, payload);
+    console.log(response.data)
     return response.data;
 } catch (error: any) {
     if (error.response) {

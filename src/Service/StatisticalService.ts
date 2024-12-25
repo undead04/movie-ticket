@@ -7,7 +7,7 @@ export default class StatisticalService{
     constructor(){
         this.ticketRepository = new DataService(Ticket,'ticket')
     }
-    async getFillter(movieId:number,from?:Date,to?:Date,theaterId?:number,page:number=1,pageSize:number=10){
+    async getFillter(movieId?:number,from?:Date,to?:Date,theaterId?:number,page:number=1,pageSize:number=10){
         const queryBuilder = (await this.ticketRepository.createQueryBuilder())
         .innerJoin('ticket.bill','bill')
         .innerJoin('ticket.showtime','showtime')
@@ -15,8 +15,11 @@ export default class StatisticalService{
         .innerJoin('showtime.screen','screen')
         .andWhere('bill.statusOrder=:stautsOrder',{stautsOrder:StatusOrder.complete})
         .select([
-            'movie.title','COUNT(ticket.id) as ticketCount'
-        ]).andWhere('showtime.movieId=:movieId',{movieId})
+            'movie.title','COUNT(ticket.id) as ticketCount','SUM(bill.totalPrice) as totalPrice'
+        ])
+        if(movieId){
+            queryBuilder.andWhere('showtime.movieId=:movieId',{movieId})
+        }
         if(from){
             console.log(from)
             queryBuilder.andWhere('bill.bookingTime >= :from',{from})

@@ -1,4 +1,4 @@
-import { DataSource, DeepPartial, EntityManager } from "typeorm";
+import {DeepPartial, EntityManager } from "typeorm";
 import { IsDuplicatesWithSort } from "../utils/GenerationCode";
 import DataService from "./DataService";
 import { Genre } from "../Data/Genre";
@@ -58,28 +58,28 @@ export default class GenreService{
         if(IsDuplicatesWithSort(arrayName)){
             throw new CustomError(`Tạo thể loại thất bại vì có model trùng tên`,400)
         }
+        await Promise.all(datas.map(async(data)=>{
+            await this.validate(0,data)
+        }))
         await dataSource.manager.transaction(async(transactionEntityManager)=>{
-            for(const data of datas){
-                await this.create(data,transactionEntityManager)
-            }
+            await this.genreRepository.createArray(datas,transactionEntityManager)
         })
       }
     async update(id: number, data: DeepPartial<Genre>): Promise<Genre> {
         await this.validate(id,data)
         return await this.genreRepository.update(id,data)
     }
-    async remove(id:number,transactionEntityManager?:EntityManager){
+    async remove(id:number){
         await this.validateGenre(id)
-        await this.genreRepository.remove(id,transactionEntityManager)
+        await this.genreRepository.remove(id)
     }
     async removeArray(ids:number[]){
         if(IsDuplicatesWithSort(ids)){
             throw new CustomError(`Trong req.body có hai id trùng nhau`,404)
         } 
+        await Promise.all(ids.map(async(id)=>await this.validateGenre(id)))
         await dataSource.manager.transaction(async(transactionEntityManager)=>{
-            for(const id of ids){
-                await this.remove(id,transactionEntityManager)
-            }
+            this.genreRepository.removeArray(ids,transactionEntityManager)
         })
     }
     async waningDelete(ids:number[]){

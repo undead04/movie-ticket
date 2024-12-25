@@ -3,12 +3,13 @@ import { authenticateToken } from '../Middlewares/Auth';
 import ValidateErrorMiddleware from '../Middlewares/ValidateErrorMiddlware';
 import ValidatorNotFoundMiddlewares from '../Middlewares/ValidatorNotFoundMiddlewares';
 import ScreenController from '../Controllers/ScreenController';
-import { ScreenModel } from '../Model/ScreenModel';
+import { ScreenArrayModel, ScreenModel } from '../Model/ScreenModel';
 import { Screen } from "../Data/Screen";
 import AppRole from '../Model/GroupRoleModel';
 const router = express.Router();
 const screenController = new ScreenController()
 const validateError=new ValidateErrorMiddleware<ScreenModel>(ScreenModel)
+const validateArrayModel = new ValidateErrorMiddleware(ScreenArrayModel)
 const validatorNotFound=new ValidatorNotFoundMiddlewares(Screen,'screen',"Không tìm thấy phòng chiếu phim này")
 // Lấy tất cả genres với filter và phân trang
 router.get('/',
@@ -19,7 +20,7 @@ router.post("/",
     screenController.create)
 router.post("/createArray",
     authenticateToken([AppRole.Admin]),
-    validateError.ValidateError,
+    validateArrayModel.ValidateError,
     screenController.createArray)
 router.post('/checkWarningDelete'
     ,authenticateToken([AppRole.Admin])

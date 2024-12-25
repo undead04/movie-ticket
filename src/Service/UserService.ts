@@ -55,14 +55,18 @@ export default class UserService{
         if(!isMatch) return null
         return jwt.sign({ id: userData.id, role:userData.groupRole.name }, 'authToken', { expiresIn: '1h' });
     }
-    async getFillter(orderBy?:string,sort?:string,page:number=1,pageSize:number=10){
+    async getFillter(email?:string,orderBy?:string,sort?:string,page:number=1,pageSize:number=10){
         const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";  // Đảm bảo sortOrder có giá trị hợp lệ
-        let queryBuilder =(await this.userRepository.createQueryBuilder())
+        let queryBuilder =await (await this.userRepository.createQueryBuilder())
+        if(email){
+            queryBuilder = queryBuilder.andWhere('user.email =:email',{email})
+        }
         if(orderBy){
             queryBuilder=queryBuilder.orderBy(`user.${orderBy}`,sortOrder)
         }
 
         const data = await this.userRepository.getPagination(queryBuilder,page,pageSize)
+        return data
     }
     async updatePassword(id:number,model:PasswordModel){
         const record = await this.validateUser(id)

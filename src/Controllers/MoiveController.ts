@@ -1,6 +1,6 @@
 import { NextFunction,Request,Response } from "express";
 import { IMovieModel } from "../Model/MovieModel";
-import { parseStatusMovie } from "../utils/ConverEnum";
+import { parseNumber, parseStatusMovie } from "../utils/ConverEnum";
 import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
 import { IDataDeleteModel } from "../Model/dataModel";
 import MovieService from "../Service/MovieService";
@@ -26,11 +26,11 @@ export default class MovieController{
             // Chuyển giá trị `page` và `pageSize` sang kiểu số và đảm bảo mặc định là 1 và 10 nếu không có trong query
             const pageNumber = Number(page) || 1;
             const pageSizeNumber = Number(pageSize) || 10;
-            const statusMovieEnum:StatusMovie=parseStatusMovie(statusMovie)
+            const statusMovieNumber = parseNumber(statusMovie)
             const orderByField=orderBy as string;
             const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";
             const titleString = title as string
-            const data = await this.movieService.getFillter(titleString,genreIdArray,statusMovieEnum,orderByField,sortOrder,pageNumber,pageSizeNumber)
+            const data = await this.movieService.getFillter(titleString,genreIdArray,statusMovieNumber,orderByField,sortOrder,pageNumber,pageSizeNumber)
             // Trả dữ liệu về cho client
             res.status(200).json(RepositoryDTO.WithData(200,data));
         }catch(error:any){

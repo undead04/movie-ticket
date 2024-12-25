@@ -1,5 +1,5 @@
 import { NextFunction,Request,Response } from "express";
-import { IScreenModel } from "../Model/ScreenModel";
+import { ScreenArrayModel, ScreenModel } from "../Model/ScreenModel";
 import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
 import { IDataDeleteModel } from "../Model/dataModel";
 import ScreenServie from "../Service/ScreenService";
@@ -57,7 +57,7 @@ export default class ScreenController{
     async create (req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
           
-            const model:IScreenModel=req.body
+            const model:ScreenModel=req.body
             await this.screenService.create({
                 ...model,
                 theater:{id:model.theaterId}
@@ -73,7 +73,7 @@ export default class ScreenController{
     async update (req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
             const id=Number(req.params.id);
-            const model:IScreenModel=req.body;
+            const model:ScreenModel=req.body;
             await this.screenService.update(id,{
                 name:model.name,
                 seatCapacity:model.seatCapacity,
@@ -102,11 +102,12 @@ export default class ScreenController{
         try{
           
             // Tạo đối tượng từ request body
-            const models:IScreenModel[]=req.body;
-            await this.screenService.createArray(models.map((model)=>({
+            const models:ScreenArrayModel=req.body;
+            const theaterId = models.theaterId
+            await this.screenService.createArray(models.screen.map((model)=>({
                 name:model.name,
                 seatCapacity:model.seatCapacity,
-                theater:{id:model.theaterId}
+                theater:{id:theaterId}
              })))
              res.status(200).json(RepositoryDTO.Success("Tạo danh sách phòng chiếu phim thành công thành công"))
         }catch(error:any){

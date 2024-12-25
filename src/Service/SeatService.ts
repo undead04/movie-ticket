@@ -7,7 +7,6 @@ import { Screen } from "../Data/Screen";
 import { Ticket } from "../Data/Ticket";
 import { Showtime } from "../Data/Showtime";
 import dataSource from "../DataSource";
-import { validate } from 'class-validator';
 
 export default class SeatService{
     protected screenRepository:DataService<Screen>
@@ -27,7 +26,9 @@ export default class SeatService{
         }
         const seatStatus = await (await this.seatRepository.createQueryBuilder())
         .leftJoinAndSelect('seat.tickets', 'ticket', 'ticket.seatId = seat.id AND ticket.showtimeId = :showtimeId', { showtimeId })
-        .leftJoinAndSelect('ticket.bill','bill','bill.id = ticket.billId AND bill.statusOrder = 2')            
+        .leftJoinAndSelect('ticket.bill','bill','bill.id = ticket.billId AND bill.statusOrder = 2') 
+        .leftJoin('seat.screen','screen')
+        .leftJoin('screen.showtimes','showtime')           
         .select([
             'seat.*',
             `CASE 
@@ -35,16 +36,20 @@ export default class SeatService{
                 ELSE true
             END AS status`,
         ])
+        .andWhere('showtime.id =:showtimeId',{showtimeId})
         .getRawMany();
         return seatStatus
     }
-    async getFillter(screenId?:number,orderBy?:string,sort?:string,page:number=1,pageSize:number=10){
+    async getFillter(screenId?:number,seatNumber?:string,orderBy?:string,sort?:string,page:number=1,pageSize:number=10){
         const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";
         let queryBuilder =(await this.seatRepository.createQueryBuilder())
         .leftJoinAndSelect("seat.screen","screen")
-        if(screenId){
-            queryBuilder=queryBuilder.where("seat.screenId =:screenId",{screenId})
+        if (seatNumber) {
+            queryBuilder = queryBuilder.andWhere("seat.seatNumber LIKE :seatNumber", { seatNumber: `%${seatNumber}%` });
         }
+        if (screenId) {
+            queryBuilder = queryBuilder.andWhere("seat.screenId = :screenId", { screenId });
+        }        
         if(orderBy){
             queryBuilder=queryBuilder.orderBy(`seat.${orderBy}`,sortOrder)
         }
@@ -99,12 +104,12 @@ export default class SeatService{
         if(IsDuplicatesWithSort(arrayName)){
             throw new CustomError(`Tạo thể loại thất bại vì có model trùng`,400)
         }
-        
+        await Promise.all(datas.map(async(data)=>{
+            await this.validate(0,data)
+        }))
         await dataSource.manager.transaction(async(transactionEntityManager)=>{
-            for(const data of datas){
-                await this.limitSeat(data.screen.id,1)
-                await this.create(data,transactionEntityManager)
-            }
+            await this.limitSeat(datas[0].screen.id,datas.length)
+            await this.seatRepository.createArray(datas,transactionEntityManager)
         })
       }
       async remove(id: number,transactionEntityManager?:EntityManager): Promise<void> {
@@ -115,10 +120,9 @@ export default class SeatService{
         if(IsDuplicatesWithSort(ids)){
             throw new CustomError(`Trong req.body có hai id trùng nhau`,404)
         } 
+        await Promise.all(ids.map(async(id)=>await this.validateSeat(id)))
         await dataSource.manager.transaction(async(transactionEntityManager)=>{
-            for(const id of ids){
-                await this.remove(id,transactionEntityManager)
-            }
+            this.seatRepository.removeArray(ids,transactionEntityManager)
         })
     }
     async waningDelete(ids:number[]){

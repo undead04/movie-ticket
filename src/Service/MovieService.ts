@@ -7,8 +7,9 @@ import { IMovieModel } from "../Model/MovieModel";
 import { MovieGenre } from "../Data/MovieGenre";
 import dataSource from "../DataSource";
 import { StatusMovie } from "../Controllers/MoiveController";
-import { EntityManager } from "typeorm";
+import { DeepPartial, EntityManager } from "typeorm";
 import { Genre } from "../Data/Genre";
+import { plainToClass, plainToInstance } from "class-transformer";
 
 export default class MovieService{
     protected movieRepository: DataService<Movie>
@@ -37,13 +38,13 @@ export default class MovieService{
             'genre.id'
             ])
     }
-    async getFillter(title?:string,genreId?:string[],statusMovieEnum?:StatusMovie,orderBy?:string,sort?:string,page:number=1,pageSize:number=10){
+    async getFillter(title?:string,genreId?:string[],statusMovieEnum?:number,orderBy?:string,sort?:string,page:number=1,pageSize:number=10){
         const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";
         let queryBuilder =await this.movieRepository.createQueryBuilder()
         queryBuilder = (await queryBuilder).leftJoinAndSelect('movie.movieGenre', 'movieGenre')
                                             .leftJoinAndSelect('movieGenre.genre',"genre"); 
         if(title){
-             queryBuilder=queryBuilder.where("movie.title LIKE :title",{title:`%${title}%`})
+             queryBuilder=queryBuilder.andWhere("movie.title LIKE :title",{title:`%${title}%`})
         }    
         // Lọc theo genreId từ bảng MovieGenre
         if(genreId && genreId.length > 0) {
@@ -51,8 +52,11 @@ export default class MovieService{
             genreId
             });
         }
+      
         if(statusMovieEnum){
-            const nowDate= Date.now();
+             // Lấy ngày hiện tại
+            const nowDate = new Date().toISOString(); // Chuyển ngày thành định dạng ISO chuẩn
+            console.log(nowDate);
             switch(statusMovieEnum){
                 case StatusMovie.announcing:
                   queryBuilder=queryBuilder.andWhere('movie.releaseDate <=:value',{value:nowDate})
@@ -104,17 +108,23 @@ export default class MovieService{
     protected async validate(id: number, data: IMovieModel) {
         // Kiểm tra sự tồn tại của bản ghi
         if(id) await this.validateMovie(id)
+        if(IsDuplicatesWithSort(data.genreId)){
+            throw new CustomError("Chọn trùng thể loại",400)
+        }
         await Promise.all(data.genreId.map(async(id)=>await this.validateGenre(id)))
         // Kiểm tra tên có trùng hay không
         const record = await this.Unique(data.title);
         // Nếu record là null (tức là không có bản ghi nào), kiểm tra tên
-        if (record && record.id!==id) {
+        if (record && record.id !== id) {
           throw new CustomError(`Tên phim ${data.title} đã tồn tại`, 400,'name');
         }
-       
+        if(data.releaseDate > data.endDate){
+            throw new CustomError(`Ngày phát hành không đc lớn hơn ngày kết thúc`,400,'releaseDate')
+        }
       }      
     async create(data: IMovieModel): Promise<void> {
         await this.validate(0,data);
+       
         await dataSource.manager.transaction(async(transactionEntityManager)=>{
             const dataMovie = await this.movieRepository.create({
                 ...data,
@@ -135,9 +145,22 @@ export default class MovieService{
         if(IsDuplicatesWithSort(arrayName)){
             throw new CustomError(`Tạo thể loại thất bại vì có model trùng tên`,400)
         }
-        for(const data of datas){
-            await this.create(data)
-        }
+        await Promise.all(datas.map(async(data)=>{
+            await this.validate(0,data)
+        }))
+        await dataSource.manager.transaction(async (entityManager)=>{
+            const insertResult = await this.movieRepository.createArray(datas,entityManager)
+             // Lấy danh sách các id của các bản ghi phim đã insert
+            const movieIds = insertResult.identifiers.map(identifier => identifier.id);
+            const genreRecords:DeepPartial<MovieGenre>[] = datas.flatMap((data, index) =>
+                data.genreId.map(genreId => ({
+                  genre:{id:genreId},
+                  movie:{id:movieIds[index]}
+                }))
+              );
+             // Bulk insert các bản ghi thể loại
+            await this.genreMovieRepository.createArray(genreRecords,entityManager)
+        })
       }
     async remove(id:number,transactionEntity?:EntityManager):Promise<void>{
         await this.validateMovie(id)
@@ -147,19 +170,22 @@ export default class MovieService{
         if(IsDuplicatesWithSort(ids)){
             throw new CustomError(`Trong req.body có hai id trùng nhau`,404)
         } 
+        await Promise.all(ids.map(async(id)=>await this.validateMovie(id)))
         await dataSource.manager.transaction(async(transactionEntityManager)=>{
-            for(const id of ids){
-                await this.remove(id,transactionEntityManager)
-            }
+            this.movieRepository.removeArray(ids,transactionEntityManager)
         })
     }
     async update(id:number,data:IMovieModel):Promise<void>{
         await this.validate(id,data);
+        const genreMovieId =await (await this.genreMovieRepository.createQueryBuilder())
+        .where('movieGenre.movieId =:movieId',{movieId:id}).select(['movieGenre.id']).getMany()
+        console.log(genreMovieId)
         await dataSource.manager.transaction(async(transactionEntityManager)=>{
             const dataMovie = await this.movieRepository.update(id,{
-                ...data,
+                title:data.title,description:data.description,duration:data.duration,trailerUrl:data.trailerUrl,
+                posterUrl:data.posterUrl,releaseDate:data.releaseDate,endDate:data.endDate
             },transactionEntityManager)
-            await this.genreMovieRepository.removeArray(dataMovie.movieGenre.map(genre=>genre.id))
+            await this.genreMovieRepository.removeArray(genreMovieId.map(item=>item.id),transactionEntityManager)
             await this.genreMovieRepository.createArray(data.genreId.map(genre=>({
                 movie:{id:dataMovie.id},
                 genre:{id:genre}
@@ -171,13 +197,13 @@ export default class MovieService{
                 await Promise.all(ids.map(async(id)=>await this.checkWaningDelete(id)))
             }
         }
-        protected async checkWaningDelete(id:number){
-            await this.validateGenre(id)
-            const records =await (await this.movieRepository.createQueryBuilder())
+    protected async checkWaningDelete(id:number){
+        await this.validateGenre(id)
+        const records =await (await this.movieRepository.createQueryBuilder())
             .innerJoin('movie.showtimes','showtime')
             .andWhere('showtime.movieId =:id',{id}).getOne()
-            if(records){
-                throw new CustomError(`Bạn xóa phim ${records.title} có thể mất nhiều dữ liệu quan trọng`,409)
-            }
+        if(records){
+            throw new CustomError(`Bạn xóa phim ${records.title} có thể mất nhiều dữ liệu quan trọng`,409)
         }
+    }
 }

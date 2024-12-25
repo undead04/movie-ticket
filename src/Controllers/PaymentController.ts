@@ -5,6 +5,7 @@ import { AuthRequest } from "../Middlewares/Auth";
 import { StatusOrder } from "../Model/BillModel";
 import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
 import BillService from '../Service/BillService';
+import { AutoBind } from "../utils/AutoBind";
 
 export default class PaymentController{
     protected momoService:MomoService
@@ -13,6 +14,7 @@ export default class PaymentController{
         this.momoService = new MomoService()
         this.billService = new BillService()
     }
+    @AutoBind
     async createPayment(req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
             const model:MomoModel=req.body;
@@ -27,6 +29,7 @@ export default class PaymentController{
             res.status(500).json(error)
         }
     }
+    @AutoBind
     async callBackPayment (req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
         try{
             
@@ -52,23 +55,28 @@ export default class PaymentController{
               res.status(500).json(error)
           }
     }
+    @AutoBind
     async transactionStatus (req:Request,res:Response,next:NextFunction):Promise<void>{
         try{
             const model:ITransactionStatus=req.body
             const data= await this.momoService.transactionStatusOrder(model)
             const dataBill=await this.billService.getBillCode(data.orderId)
+            if(dataBill.statusOrder != StatusOrder.pending){
+                res.json(400).json(RepositoryDTO.Error(400,"Không thể cập nhập hóa đơn nữa"));
+                return
+            }
             if(dataBill==null) return
             if(data.resultCode!=0){
                 await this.billService.update(dataBill.id,{
                     statusOrder:StatusOrder.fail,
-                    paymentMethod:data.orderType,
+                    paymentMethod:data.payType,
                 })
                 res.status(200).json(RepositoryDTO.Success("Thanh toán thất bại"))
                 return
             }
             await this.billService.update(dataBill.id,{
                 statusOrder:StatusOrder.complete,
-                paymentMethod:data.orderType,
+                paymentMethod:data.payType,
                 bookingTime:new Date()
             })
             res.status(200).json(RepositoryDTO.Success("Thanh toán thành công"))

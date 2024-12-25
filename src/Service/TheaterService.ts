@@ -50,9 +50,9 @@ export default class TheaterService{
 
       }
       
-    async create(data: DeepPartial<Theater>, transactionalEntityManager?: EntityManager): Promise<Theater> {
+    async create(data: DeepPartial<Theater>): Promise<Theater> {
         await this.validate(0,data)
-        return await this.theaterService.create(data,transactionalEntityManager)
+        return await this.theaterService.create(data)
     }
     async createArray(
         datas: DeepPartial<Theater>[],
@@ -63,10 +63,11 @@ export default class TheaterService{
         if(IsDuplicatesWithSort(arrayName)){
             throw new CustomError(`Tạo thể loại thất bại vì có model trùng tên`,400)
         }
+        await Promise.all(datas.map(async(data)=>{
+            await this.validate(0,data)
+        }))
         await dataSource.manager.transaction(async(transactionEntityManager)=>{
-            for(const data of datas){
-                await this.create(data,transactionEntityManager)
-            }
+            await this.theaterService.createArray(datas,transactionEntityManager)
         })
         
     }
@@ -77,18 +78,17 @@ export default class TheaterService{
     async get(id:number){
         return await this.theaterService.getBy(id)
     }
-    async remove(id:number,transactionEntityManager?:EntityManager){
+    async remove(id:number){
         await this.validateTheater(id)
-        await this.theaterService.remove(id,transactionEntityManager)
+        await this.theaterService.remove(id)
     }
     async removeArray(ids:number[]){
         if(IsDuplicatesWithSort(ids)){
             throw new CustomError(`Trong req.body có hai id trùng nhau`,400)
         }
+        await Promise.all(ids.map(async(id)=>await this.validateTheater(id)))
         await dataSource.manager.transaction(async(transactionEntityManager)=>{
-            for(const id of ids){
-                await this.remove(id,transactionEntityManager)
-            }
+            this.theaterService.removeArray(ids,transactionEntityManager)
         })
     }
     async waningDelete(ids:number[]){

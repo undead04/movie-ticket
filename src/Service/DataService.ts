@@ -9,6 +9,7 @@ import {
 import dataSource from '../DataSource'; // Assuming dataSource is configured correctly
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import CustomError from '../validations/CustumError';
+import { plainToInstance } from 'class-transformer';
 
 interface IRelationship {
   original: string;
@@ -55,7 +56,6 @@ export default  class DataService<T extends ObjectLiteral> {
   ): Promise<IPagination<T>> {
     queryBuilder.skip((page - 1) * pageSize).take(pageSize);
     const [records, total] = await queryBuilder.getManyAndCount();
-
     return {
       records,
       total,
@@ -126,9 +126,9 @@ export default  class DataService<T extends ObjectLiteral> {
   async createArray(
     data: DeepPartial<T>[],
     transactionalEntityManager?: EntityManager
-  ): Promise<void> {
+  ){
     if (!data.length) return;
-    await transactionalEntityManager
+    return await transactionalEntityManager
       .createQueryBuilder()
       .insert()
       .into(this.entity)
