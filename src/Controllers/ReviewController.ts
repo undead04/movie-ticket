@@ -1,106 +1,112 @@
-import { NextFunction,Request,Response } from "express";
-import { AuthRequest } from "../Middlewares/Auth";
-import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
-import { IDataDeleteModel } from "../Model/dataModel";
-import ReviewService from '../Service/ReviewService'
-import { ReviewModel, ReviewUpdateModel } from "../Model/ReviewModel";
-import { AutoBind } from "../utils/AutoBind";
-export default class ReviewController{
-    protected reviewService:ReviewService
-    constructor(){
-        this.reviewService = new ReviewService()
-        
-    }
-@AutoBind    
-async getAllWithFilterAndPagination (req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
-    try{
-        const {rating,movieId,orderBy,sort,page,pageSize}=req.query;
-        const pageNumber = Number(page) || 1;
-        const pageSizeNumber = Number(pageSize) || 10;
-        const orderByField=orderBy as string;
-        const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";
-        const ratingNumber = Number(rating)
-        const movieIdNumber = Number(movieId)
-        const id = req._id
-        const role = req.role
-        const data = await this.reviewService.getFillter(id,role,ratingNumber,movieIdNumber,orderByField,sortOrder,pageNumber,pageSizeNumber)
-        res.status(200).json(RepositoryDTO.WithData(200,data))
-        
-    }catch(error:any){
-        console.log(error)
-        next(error)
-    }
+import { Review } from "../entitys/Review";
+import { notFound, notFoundArray } from "../middlewares/NotFoundHandle";
+import validateError from "../middlewares/ValidateErrorDTO";
+import { DeleteModel } from "../models/modelRequest/DeleteModel";
+import { ReviewFilter } from "../models/modelRequest/FilterModel";
+import { ReviewModel } from "../models/modelRequest/ReviewModel";
+import ReviewService from "../services/ReviewService";
+import BaseController from "../utils/BaseController";
+import {
+  Body,
+  Delete,
+  Request,
+  Get,
+  Middlewares,
+  Path,
+  Post,
+  Put,
+  Queries,
+  Route,
+  Security,
+  SuccessResponse,
+  Tags,
+} from "tsoa";
+import { UserToken } from "middlewares/authentication";
+@Route("/Review")
+@Tags("Review Controller")
+export class ReviewController extends BaseController<ReviewService> {
+  constructor() {
+    const service = new ReviewService();
+    super(service);
+  }
+  /**
+   *Lọc thể loại đồ ăn thêm tên,page,pagesize,với sắp xếp
+   */
+  @Get("/")
+  async getFilter(@Queries() filter: ReviewFilter) {
+    return await super.getFilter({
+      ...filter,
+      page: filter.page || 1,
+      pageSize: filter.pageSize || 10,
+    });
+  }
+  @Post("/")
+  /**
+   * Thêm dữ liệu thể loại đồ ăn
+   *
+   */
+  @Security("JWT", ["admin", "user"])
+  @Middlewares([validateError(ReviewModel)])
+  @SuccessResponse(201, "Create")
+  async create(@Request() req: any, @Body() data) {
+    const user: UserToken = req.user;
+    return await super.create({
+      ...data,
+      movie: { id: data.movieId },
+      user: { id: user.id },
+    });
+  }
 
-}
-@AutoBind
-async get (req:Request,res:Response,next:NextFunction):Promise<void>{
-    try{
-      
-        const id=Number(req.params.id);
-        const data = await this.reviewService.get(id)
-        res.status(200).json(RepositoryDTO.WithData(200,data))
-    }catch(error:any){
-        console.log(error)
-        next(error)
-    }
+  @Get("{id}")
+  /**
+   * Lấy một bản ghi thể loại đồ ăn
+   *
+   */
+  async getOne(@Path() id: number) {
+    return await super.getOne(id);
+  }
 
-}
-@AutoBind
-async remove (req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
-    try{
-       const id=Number(req.params.id)
-       const role:string=req.role
-       const userId:number=req._id
-        await this.reviewService.remove(id)
-        res.status(200).json(RepositoryDTO.Success("Xóa bình luận thành công"))
-    }catch(error:any){
-        console.log(error)
-        next(error)
-    }
+  // UPDATE - Cập nhật bản ghi
+  @Put("{id}")
+  /**
+   * Cập nhập thể loại
+   * @example id "1"
+   */
+  @Security("JWT", ["admin", "user"])
+  @Middlewares([notFound(Review, "review"), validateError(ReviewModel)])
+  async update(
+    @Path() id: number,
+    @Body() data: ReviewModel,
+    @Request() req: any
+  ) {
+    const user: UserToken = req.user;
+    return await super.update(id, {
+      rating: data.rating,
+      comment: data.comment,
+      user: { id: user.id },
+      movie: { id: data.movieId },
+    });
+  }
 
-}
-@AutoBind
-async create (req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
-    try{
-      
-        // Tạo đối tượng từ request body
-        const model:ReviewModel=req.body;
-        const userId = req._id
-         await this.reviewService.create({
-            ...model,
-            movie:{id:model.movieId},
-            user:{id:userId}
-         })
-         res.status(200).json(RepositoryDTO.Success("Tạo bình luận thành công"))
-    }catch(error:any){
-        console.log(error)
-        next(error)
-    }
-
-}
-@AutoBind
-async update (req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
-    try{
-        const id=Number(req.params.id);
-        const model:ReviewUpdateModel=req.body;
-        this.reviewService.update(id,model)
-         res.status(200).json(RepositoryDTO.Success("Cập nhập bình luận thành công"))
-    }catch(error:any){
-        console.log(error)
-        next(error)
-    }
-
-}
-@AutoBind
-async removeArray (req:Request,res:Response,next:NextFunction):Promise<void>{
-    try{
-        const model:IDataDeleteModel=req.body;
-        this.reviewService.removeArray(model.ids)
-        res.status(200).json(RepositoryDTO.Success("Xóa các bình luận thành công"))
-     }catch(error:any){
-         console.log(error)
-         next(error)
-     }
-}
-
+  @Delete("{id}")
+  /**
+   * Xóa một thể loại
+   * @example id 1
+   */
+  @Security("JWT", ["admin", "user"])
+  async delete(@Path() id: number) {
+    return await super.delete(id);
+  }
+  @Security("JWT", ["admin", "user"])
+  @Delete("/")
+  @Middlewares([notFoundArray(Review, "review"), validateError(DeleteModel)])
+  /**
+   * Xóa một mảng thể loại
+   * @example{
+   * "ids":[1,2,3]
+   * }
+   */
+  async deleteArray(@Body() data: DeleteModel) {
+    return await super.deleteArray(data);
+  }
 }

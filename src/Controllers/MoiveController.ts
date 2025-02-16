@@ -1,127 +1,96 @@
-import { NextFunction,Request,Response } from "express";
-import { IMovieModel } from "../Model/MovieModel";
-import { parseNumber, parseStatusMovie } from "../utils/ConverEnum";
-import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
-import { IDataDeleteModel } from "../Model/dataModel";
-import MovieService from "../Service/MovieService";
-import { AutoBind } from "../utils/AutoBind";
-
-export  enum StatusMovie{
-    noStatus=0,
-    announcing=1,
-    comingSoon=2,
-    stopShowing=3,
+import AppRole from "models/modelRequest/AppRole";
+import { Movie } from "../entitys/Movie";
+import { notFound, notFoundArray } from "../middlewares/NotFoundHandle";
+import validateError from "../middlewares/ValidateErrorDTO";
+import { DeleteModel } from "../models/modelRequest/DeleteModel";
+import { MovieFilter } from "../models/modelRequest/FilterModel";
+import { MovieModel } from "../models/modelRequest/MovieModel";
+import MovieService from "../services/MovieService";
+import BaseController from "../utils/BaseController";
+import {
+  Body,
+  Delete,
+  Get,
+  Middlewares,
+  Path,
+  Post,
+  Put,
+  Queries,
+  Route,
+  Security,
+  SuccessResponse,
+  Tags,
+} from "tsoa";
+@Route("/Movie")
+@Tags("Movie Controller")
+export class MovieController extends BaseController<MovieService> {
+  constructor() {
+    const service = new MovieService();
+    super(service);
+  }
+  /**
+   *Lọc phim
+   */
+  @Get("/")
+  async getFilter(@Queries() filter: MovieFilter) {
+    return await super.getFilter({
+      ...filter,
+      page: filter.page || 1,
+      pageSize: filter.pageSize || 10,
+    });
+  }
+  @Post("/")
+  /**
+   * Thêm bản ghi phim
+   *
+   */
+  @Security("JWT", ["admin"])
+  @Middlewares([validateError(MovieModel)])
+  @SuccessResponse(201, "Create")
+  async create(@Body() data: MovieModel) {
+    return await super.create(data);
   }
 
-export default class MovieController{
-    movieService:MovieService
-    constructor(){
-        this.movieService = new MovieService()
-    }
-    @AutoBind
-    async getAllWithFilterAndPagination(req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-            const { title, genreId,orderBy,sort, statusMovie,page, pageSize } = req.query;
-            const genreIdArray = genreId  ? genreId.toString().split(',') : undefined;
-            // Chuyển giá trị `page` và `pageSize` sang kiểu số và đảm bảo mặc định là 1 và 10 nếu không có trong query
-            const pageNumber = Number(page) || 1;
-            const pageSizeNumber = Number(pageSize) || 10;
-            const statusMovieNumber = parseNumber(statusMovie)
-            const orderByField=orderBy as string;
-            const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";
-            const titleString = title as string
-            const data = await this.movieService.getFillter(titleString,genreIdArray,statusMovieNumber,orderByField,sortOrder,pageNumber,pageSizeNumber)
-            // Trả dữ liệu về cho client
-            res.status(200).json(RepositoryDTO.WithData(200,data));
-        }catch(error:any){
-            console.log(error)
-           next(error)
-        }
-    }
-    @AutoBind
-    async get (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-          
-            const id=Number(req.params.id);
-            const data = await this.movieService.get(id)
-            res.status(200).json(RepositoryDTO.WithData(200,data))
-        }catch(error:any){
-            console.log(error)
-           next(error)
-        }
-    
-    }
-    @AutoBind
-    async remove (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-            const id:number = Number(req.params.id)
-           await this.movieService.remove(id)
-            res.status(200).json(RepositoryDTO.Success("Xóa phim thành công"))
-        }catch(error:any){
-            console.log(error)
-           next(error)
-        }
-    
-    }
-    @AutoBind
-    async create (req:Request,res:Response,next:NextFunction):Promise<void> {
-        try{
-            const model:IMovieModel=req.body;
-            await this.movieService.create(model)
-            res.status(200).json(RepositoryDTO.Success("Tạo phim thành công"))
-        }catch(error:any){
-            console.log(error)
-           next(error)
-        }
-    
-    }
-    @AutoBind
-    async update (req:Request,res:Response,next:NextFunction):Promise<void> {
-        try{
-            const id=Number(req.params.id);
-            const model:IMovieModel=req.body;
-            await this.movieService.update(id,model)
-            res.status(200).json(RepositoryDTO.Success("Cập nhập phim thành công"))
-        }catch(error:any){
-            console.log(error)
-           next(error)
-        }
-    
-    }
-    @AutoBind
-    async removeArray (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-            const model:IDataDeleteModel=req.body;
-            await this.movieService.removeArray(model.ids)
-            res.status(200).json(RepositoryDTO.Success("Xóa các phim này thành công"))
-         }catch(error:any){
-             console.log(error)
-            next(error)
-         }
-    }
-    @AutoBind
-    async createArray (req:Request,res:Response,next:NextFunction):Promise<void> {
-        try{
-          
-            // Tạo đối tượng từ request body
-            const models:IMovieModel[]=req.body;
-            await this.movieService.createArray(models)
-            res.status(200).json(RepositoryDTO.Success("Tạo danh sách phim thành công thành công"))
-        }catch(error:any){
-            console.log(error)
-           next(error)
-        }
-    
-    }
-    @AutoBind
-    async waningDelete(req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-            const ids = req.body.ids
-            await this.movieService.waningDelete(ids)
-            res.status(200).json()
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    }
+  @Get("{id}")
+  /**
+   * Lấy một bản ghi phim
+   *
+   */
+  async getOne(@Path() id: number) {
+    return await super.getOne(id);
+  }
+
+  // UPDATE - Cập nhật bản ghi
+  @Put("{id}")
+  /**
+   * Cập nhập bản ghi
+   * @example id "1"
+   */
+  @Security("JWT", ["admin"])
+  @Middlewares([notFound(Movie, "movie"), validateError(MovieModel)])
+  async update(@Path() id: number, @Body() data: MovieModel) {
+    return await super.update(id, data);
+  }
+
+  @Delete("{id}")
+  /**
+   * Xóa một bản ghi
+   * @example id 1
+   */
+  @Security("JWT", ["admin"])
+  async delete(@Path() id: number) {
+    return await super.delete(id);
+  }
+  @Security("JWT", ["admin"])
+  @Delete("/")
+  @Middlewares([notFoundArray(Movie, "movie"), validateError(DeleteModel)])
+  /**
+   * Xóa một mảng bản ghi
+   * @example{
+   * "ids":[1,2,3]
+   * }
+   */
+  async deleteArray(@Body() data: DeleteModel) {
+    return await super.deleteArray(data);
+  }
 }

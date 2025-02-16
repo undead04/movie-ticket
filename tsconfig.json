@@ -1,14 +1,28 @@
 {
+  "compileOnSave": false,
   "compilerOptions": {
-    "target": "ES6",
-    "module": "CommonJS",
-
-    "outDir": "./dist",              // Chuyển các file đã biên dịch vào thư mục dist
-    "rootDir": "./src",              // Chỉ định thư mục nguồn
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./src",
+    "declaration": true,
+    "emitDecoratorMetadata": true,
     "esModuleInterop": true,
-    "experimentalDecorators": true,  // Bật decorators
-    "emitDecoratorMetadata": true    // Bật metadata cho decorators
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": true,
+    "lib": ["es2021", "esnext.asynciterable"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noEmit": false,
+    "pretty": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "target": "es2017",
+    "typeRoots": ["node_modules/@types"],
+    "outDir": "./dist",  // Thư mục đầu ra chứa tệp JS biên dịch
+    "rootDir": "./src",  // Thư mục chứa mã nguồn TypeScript
+
   },
-  "include": ["src/**/*"],            // Chỉ bao gồm các file trong thư mục src
+  "include": ["src/**/*.ts", "src/**/*.json", ".env"],
   "exclude": ["node_modules"]
 }

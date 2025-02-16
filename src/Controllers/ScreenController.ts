@@ -1,131 +1,96 @@
-import { NextFunction,Request,Response } from "express";
-import { ScreenArrayModel, ScreenModel } from "../Model/ScreenModel";
-import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
-import { IDataDeleteModel } from "../Model/dataModel";
-import ScreenServie from "../Service/ScreenService";
-import { AutoBind } from "../utils/AutoBind";
+import { Screen } from "../entitys/Screen";
+import { notFound, notFoundArray } from "../middlewares/NotFoundHandle";
+import validateError from "../middlewares/ValidateErrorDTO";
+import { DeleteModel } from "../models/modelRequest/DeleteModel";
+import { ScreenFilter } from "../models/modelRequest/FilterModel";
+import AppRole from "../models/modelRequest/AppRole";
+import { ScreenModel } from "../models/modelRequest/ScreenModel";
+import ScreenServie from "../services/ScreenService";
+import BaseController from "../utils/BaseController";
+import {
+  Body,
+  Delete,
+  Get,
+  Middlewares,
+  Path,
+  Post,
+  Put,
+  Queries,
+  Route,
+  Security,
+  SuccessResponse,
+  Tags,
+} from "tsoa";
+@Route("/Screen")
+@Tags("Screen Controller")
+export class ScreenController extends BaseController<ScreenServie> {
+  constructor() {
+    const service = new ScreenServie();
+    super(service);
+  }
+  /**
+   *Lọc phòng chiếu phim
+   */
+  @Get("/")
+  async getFilter(@Queries() filter: ScreenFilter) {
+    return await super.getFilter({
+      ...filter,
+      page: filter.page || 1,
+      pageSize: filter.pageSize || 10,
+    });
+  }
+  @Post("/")
+  /**
+   * Thêm bản ghi phòng chiếu phim
+   *
+   */
+  @Security("JWT", ["admin"])
+  @Middlewares([validateError(ScreenModel)])
+  @SuccessResponse(201, "Create")
+  async create(@Body() data: ScreenModel) {
+    return await super.create({ ...data, theater: { id: data.theaterId } });
+  }
 
-export default class ScreenController{
-    screenService:ScreenServie
-    constructor(){
-        this.screenService=new ScreenServie()
-    }
-    @AutoBind
-    async getAllWithFilterAndPagination (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-            const {theaterId,orderBy,sort,page,pageSize}=req.query;
-            const pageNumber = Number(page) || 1;
-            const pageSizeNumber = Number(pageSize) || 10;
-            const orderByField=orderBy as string;
-            const theaterIdNumber=Number(theaterId)
-            const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";
-            const data =await this.screenService.getFillter(theaterIdNumber,orderByField,sortOrder,pageNumber,pageSizeNumber)
-            res.status(200).json(RepositoryDTO.WithData(200,data))
-            
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    
-    }
-    @AutoBind
-    async get(req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-          
-            const id=Number(req.params.id);
-            const record = await this.screenService.get(id)
-            res.status(200).json(RepositoryDTO.WithData(200,record))
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    
-    }
-    @AutoBind
-    async remove (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-           const id=Number(req.params.id)
-           await this.screenService.remove(id)
-            res.status(200).json(RepositoryDTO.Success("Xóa phòng thành công"))
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    
-    }
-    @AutoBind
-    async create (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-          
-            const model:ScreenModel=req.body
-            await this.screenService.create({
-                ...model,
-                theater:{id:model.theaterId}
-            })
-            res.status(200).json(RepositoryDTO.Success("Tạo phòng chiếu phim thành công"))
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    
-    }
-    @AutoBind
-    async update (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-            const id=Number(req.params.id);
-            const model:ScreenModel=req.body;
-            await this.screenService.update(id,{
-                name:model.name,
-                seatCapacity:model.seatCapacity,
-                theater:{id:model.theaterId}
-            })
-             res.status(200).json(RepositoryDTO.Success("Cập nhập phòng chiếu phim thành công"))
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    
-    }
-    @AutoBind
-    async removeArray (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-            const model:IDataDeleteModel=req.body;
-            await this.screenService.removeArray(model.ids)
-            res.status(200).json(RepositoryDTO.Success("Xóa các phòng chiếu phim này thành công"))
-         }catch(error:any){
-             console.log(error)
-             next(error)
-         }
-    }
-    @AutoBind
-    async createArray (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-          
-            // Tạo đối tượng từ request body
-            const models:ScreenArrayModel=req.body;
-            const theaterId = models.theaterId
-            await this.screenService.createArray(models.screen.map((model)=>({
-                name:model.name,
-                seatCapacity:model.seatCapacity,
-                theater:{id:theaterId}
-             })))
-             res.status(200).json(RepositoryDTO.Success("Tạo danh sách phòng chiếu phim thành công thành công"))
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    
-    }
-    @AutoBind
-        async waningDelete(req:Request,res:Response,next:NextFunction):Promise<void>{
-            try{
-                const ids = req.body.ids
-                await this.screenService.waningDelete(ids)
-                res.status(200).json()
-            }catch(error:any){
-                console.log(error)
-                next(error)
-            }
-        }
+  @Get("{id}")
+  /**
+   * Lấy một bản ghi phòng chiếu phim
+   *
+   */
+  async getOne(@Path() id: number) {
+    return await super.getOne(id);
+  }
+
+  // UPDATE - Cập nhật bản ghi
+  @Put("{id}")
+  /**
+   * Cập nhập bản ghi phòng chiếu phim
+   * @example id "1"
+   */
+  @Security("JWT", ["admin"])
+  @Middlewares([notFound(Screen, "screen"), validateError(ScreenModel)])
+  async update(@Path() id: number, @Body() data: ScreenModel) {
+    return await super.update(id, {
+      name: data.name,
+      seatCapacity: data.seatCapacity,
+      theater: { id: data.theaterId },
+    });
+  }
+
+  @Delete("{id}")
+  /**
+   * Xóa một bản ghi phòng chiếu phim
+   */
+  @Security("JWT", ["admin"])
+  async delete(@Path() id: number) {
+    return await super.delete(id);
+  }
+  @Security("JWT", ["admin"])
+  @Delete("/")
+  @Middlewares([notFoundArray(Screen, "screen"), validateError(DeleteModel)])
+  /**
+   * Xóa một mảng bản ghi phòng chiếu phim
+   */
+  async deleteArray(@Body() data: DeleteModel) {
+    return await super.deleteArray(data);
+  }
 }
-

@@ -3,11 +3,15 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "tsoa:generate": "ts-node tsoa-generate.ts",
+    "migration:generate": "npm run typeorm migration:generate -- -d ./src/DataSource.ts src/migrations/migrations_1",
+    "migration:run": "npm run typeorm migration:run -- -d ./src/DataSource.ts",
+    "schema:drop": "npm run typeorm schema:drop -- -d ./src/DataSource.ts ",
+    "build": "tsx",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon src/index.ts",
     "typeorm": "typeorm-ts-node-commonjs",
-    "migration:generate": "typeorm migration:create -n",
-    "migration:run": "npm run typeorm migration:run"
+    "seed": "ts-node src/seeder.ts"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +25,7 @@
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
+    "tsoa": "^6.6.0",
     "typescript": "^5.7.2"
   },
   "dependencies": {
@@ -35,8 +40,9 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.11.5",
+    "node-cron": "^3.0.3",
     "reflect-metadata": "^0.2.2",
-    "stripe": "^17.4.0",
+    "stripe": "^17.6.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.20"

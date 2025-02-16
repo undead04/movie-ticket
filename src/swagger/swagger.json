@@ -1,0 +1,3809 @@
+{
+	"openapi": "3.0.0",
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"RepositoryDTO_unknown_": {
+				"properties": {
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"message": {},
+					"data": {}
+				},
+				"required": [
+					"status",
+					"message",
+					"data"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"DeleteModel": {
+				"properties": {
+					"ids": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"ids"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RepositoryDTO_any_": {
+				"properties": {
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"message": {},
+					"data": {}
+				},
+				"required": [
+					"status",
+					"message",
+					"data"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PasswordModel": {
+				"properties": {
+					"oldPassword": {
+						"type": "string"
+					},
+					"newPassword": {
+						"type": "string"
+					},
+					"confirmPassword": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"oldPassword",
+					"newPassword",
+					"confirmPassword"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TypeSort": {
+				"enum": [
+					0,
+					1
+				],
+				"type": "number"
+			},
+			"UserFilter": {
+				"properties": {
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"pageSize": {
+						"type": "number",
+						"format": "double"
+					},
+					"orderBy": {
+						"type": "string"
+					},
+					"sort": {
+						"$ref": "#/components/schemas/TypeSort"
+					},
+					"username": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserModel": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"phone"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TheaterFilter": {
+				"properties": {
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"pageSize": {
+						"type": "number",
+						"format": "double"
+					},
+					"orderBy": {
+						"type": "string"
+					},
+					"sort": {
+						"$ref": "#/components/schemas/TypeSort"
+					},
+					"name": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TheaterModel": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"address",
+					"city"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ShowtimeFilter": {
+				"properties": {
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"pageSize": {
+						"type": "number",
+						"format": "double"
+					},
+					"orderBy": {
+						"type": "string"
+					},
+					"sort": {
+						"$ref": "#/components/schemas/TypeSort"
+					},
+					"showDate": {
+						"type": "string"
+					},
+					"movieId": {
+						"type": "number",
+						"format": "double"
+					},
+					"screenId": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"showDate",
+					"screenId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ShowtimeModel": {
+				"properties": {
+					"showDate": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"endTime": {
+						"type": "string"
+					},
+					"startTime": {
+						"type": "string"
+					},
+					"price": {
+						"type": "number",
+						"format": "double"
+					},
+					"movieId": {
+						"type": "number",
+						"format": "double"
+					},
+					"screenId": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"showDate",
+					"endTime",
+					"startTime",
+					"price",
+					"movieId",
+					"screenId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SeatFilter": {
+				"properties": {
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"pageSize": {
+						"type": "number",
+						"format": "double"
+					},
+					"orderBy": {
+						"type": "string"
+					},
+					"sort": {
+						"$ref": "#/components/schemas/TypeSort"
+					},
+					"seatNumber": {
+						"type": "string"
+					},
+					"screenId": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SeatModel": {
+				"properties": {
+					"row": {
+						"type": "number",
+						"format": "double"
+					},
+					"col": {
+						"type": "number",
+						"format": "double"
+					},
+					"seatNumber": {
+						"type": "string"
+					},
+					"screenId": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"row",
+					"col",
+					"seatNumber",
+					"screenId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ScreenFilter": {
+				"properties": {
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"pageSize": {
+						"type": "number",
+						"format": "double"
+					},
+					"orderBy": {
+						"type": "string"
+					},
+					"sort": {
+						"$ref": "#/components/schemas/TypeSort"
+					},
+					"theaterId": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ScreenModel": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"seatCapacity": {
+						"type": "number",
+						"format": "double"
+					},
+					"theaterId": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"name",
+					"seatCapacity",
+					"theaterId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ReviewFilter": {
+				"properties": {
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"pageSize": {
+						"type": "number",
+						"format": "double"
+					},
+					"orderBy": {
+						"type": "string"
+					},
+					"sort": {
+						"$ref": "#/components/schemas/TypeSort"
+					},
+					"userId": {
+						"type": "number",
+						"format": "double"
+					},
+					"rating": {
+						"type": "number",
+						"format": "double"
+					},
+					"movieId": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ReviewModel": {
+				"properties": {
+					"rating": {
+						"type": "number",
+						"format": "double"
+					},
+					"comment": {
+						"type": "string"
+					},
+					"movieId": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"rating",
+					"comment",
+					"movieId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PaymentModel": {
+				"properties": {
+					"showtimeId": {
+						"type": "number",
+						"format": "double"
+					},
+					"seatIds": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"showtimeId",
+					"seatIds"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"stripe.Stripe.Checkout.Session.Status": {
+				"type": "string",
+				"enum": [
+					"complete",
+					"expired",
+					"open"
+				]
+			},
+			"stripe.Stripe.Checkout.Session.PaymentStatus": {
+				"type": "string",
+				"enum": [
+					"no_payment_required",
+					"paid",
+					"unpaid"
+				]
+			},
+			"RepositoryDTO__status-stripe.Stripe.Checkout.Session.Status--payment_status-stripe.Stripe.Checkout.Session.PaymentStatus--customer_email-string__": {
+				"properties": {
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"message": {},
+					"data": {
+						"properties": {
+							"customer_email": {
+								"type": "string"
+							},
+							"payment_status": {
+								"$ref": "#/components/schemas/stripe.Stripe.Checkout.Session.PaymentStatus"
+							},
+							"status": {
+								"$ref": "#/components/schemas/stripe.Stripe.Checkout.Session.Status"
+							}
+						},
+						"required": [
+							"customer_email",
+							"payment_status",
+							"status"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"status",
+					"message",
+					"data"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"MovieFilter": {
+				"properties": {
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"pageSize": {
+						"type": "number",
+						"format": "double"
+					},
+					"orderBy": {
+						"type": "string"
+					},
+					"sort": {
+						"$ref": "#/components/schemas/TypeSort"
+					},
+					"title": {
+						"type": "string"
+					},
+					"genreId": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"statusMovieEnum": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"MovieModel": {
+				"properties": {
+					"title": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"duration": {
+						"type": "number",
+						"format": "double"
+					},
+					"releaseDate": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"endDate": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"trailerUrl": {
+						"type": "string"
+					},
+					"posterUrl": {
+						"type": "string"
+					},
+					"genreId": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"title",
+					"description",
+					"duration",
+					"releaseDate",
+					"endDate",
+					"trailerUrl",
+					"posterUrl",
+					"genreId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"GenreFilter": {
+				"properties": {
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"pageSize": {
+						"type": "number",
+						"format": "double"
+					},
+					"orderBy": {
+						"type": "string"
+					},
+					"sort": {
+						"$ref": "#/components/schemas/TypeSort"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"GenreModel": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name",
+					"description"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"LoginModel": {
+				"properties": {
+					"username": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"username",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"statusUser": {
+				"enum": [
+					0,
+					1
+				],
+				"type": "number"
+			},
+			"User": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"username": {
+						"type": "string"
+					},
+					"password_hash": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"status": {
+						"$ref": "#/components/schemas/statusUser"
+					},
+					"groupRole": {
+						"$ref": "#/components/schemas/GroupRole"
+					},
+					"bills": {
+						"items": {
+							"$ref": "#/components/schemas/Bill"
+						},
+						"type": "array"
+					},
+					"reviews": {
+						"items": {
+							"$ref": "#/components/schemas/Review"
+						},
+						"type": "array"
+					},
+					"created_at": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"username",
+					"password_hash",
+					"email",
+					"phone",
+					"status",
+					"groupRole",
+					"bills",
+					"reviews",
+					"created_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"GroupRole": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"users": {
+						"items": {
+							"$ref": "#/components/schemas/User"
+						},
+						"type": "array"
+					},
+					"groupRolePermissions": {
+						"items": {
+							"$ref": "#/components/schemas/GroupRolePermission"
+						},
+						"type": "array"
+					},
+					"created_at": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"description",
+					"users",
+					"groupRolePermissions",
+					"created_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"GroupRolePermission": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"groupRole": {
+						"$ref": "#/components/schemas/GroupRole"
+					},
+					"permission": {
+						"$ref": "#/components/schemas/Permission"
+					}
+				},
+				"required": [
+					"id",
+					"groupRole",
+					"permission"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Permission": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"groupRolePermissions": {
+						"items": {
+							"$ref": "#/components/schemas/GroupRolePermission"
+						},
+						"type": "array"
+					},
+					"created_at": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"description",
+					"groupRolePermissions",
+					"created_at"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"StatusOrder": {
+				"enum": [
+					0,
+					1,
+					2,
+					3
+				],
+				"type": "number"
+			},
+			"MethodPayment": {
+				"enum": [
+					"momo",
+					"stripe"
+				],
+				"type": "string"
+			},
+			"Showtime": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"showDate": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"startTime": {
+						"type": "string"
+					},
+					"endTime": {
+						"type": "string"
+					},
+					"price": {
+						"type": "number",
+						"format": "double"
+					},
+					"movie": {
+						"$ref": "#/components/schemas/Movie"
+					},
+					"screen": {
+						"$ref": "#/components/schemas/Screen"
+					},
+					"tickets": {
+						"items": {
+							"$ref": "#/components/schemas/Ticket"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"showDate",
+					"startTime",
+					"endTime",
+					"price",
+					"movie",
+					"screen",
+					"tickets"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Movie": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"title": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"duration": {
+						"type": "number",
+						"format": "double"
+					},
+					"trailerUrl": {
+						"type": "string"
+					},
+					"posterUrl": {
+						"type": "string"
+					},
+					"releaseDate": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"endDate": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"showtimes": {
+						"items": {
+							"$ref": "#/components/schemas/Showtime"
+						},
+						"type": "array"
+					},
+					"reviews": {
+						"items": {
+							"$ref": "#/components/schemas/Review"
+						},
+						"type": "array"
+					},
+					"movieGenre": {
+						"items": {
+							"$ref": "#/components/schemas/MovieGenre"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"title",
+					"description",
+					"duration",
+					"trailerUrl",
+					"posterUrl",
+					"releaseDate",
+					"endDate",
+					"createdAt",
+					"showtimes",
+					"reviews",
+					"movieGenre"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Review": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"rating": {
+						"type": "number",
+						"format": "double"
+					},
+					"comment": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"user": {
+						"$ref": "#/components/schemas/User"
+					},
+					"movie": {
+						"$ref": "#/components/schemas/Movie"
+					}
+				},
+				"required": [
+					"id",
+					"rating",
+					"comment",
+					"createdAt",
+					"user",
+					"movie"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"MovieGenre": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"genre": {
+						"$ref": "#/components/schemas/Genre"
+					},
+					"movie": {
+						"$ref": "#/components/schemas/Movie"
+					}
+				},
+				"required": [
+					"id",
+					"genre",
+					"movie"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Genre": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"created_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"update_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"movieGenre": {
+						"items": {
+							"$ref": "#/components/schemas/MovieGenre"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"description",
+					"created_at",
+					"update_at",
+					"movieGenre"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Screen": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"name": {
+						"type": "string"
+					},
+					"seatCapacity": {
+						"type": "number",
+						"format": "double"
+					},
+					"theater": {
+						"$ref": "#/components/schemas/Theater"
+					},
+					"seats": {
+						"items": {
+							"$ref": "#/components/schemas/Seat"
+						},
+						"type": "array"
+					},
+					"showtimes": {
+						"items": {
+							"$ref": "#/components/schemas/Showtime"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"seatCapacity",
+					"theater",
+					"seats",
+					"showtimes"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Theater": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"name": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"screens": {
+						"items": {
+							"$ref": "#/components/schemas/Screen"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"address",
+					"city",
+					"createdAt",
+					"screens"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Ticket": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"showtime": {
+						"$ref": "#/components/schemas/Showtime"
+					},
+					"seat": {
+						"$ref": "#/components/schemas/Seat"
+					},
+					"bill": {
+						"$ref": "#/components/schemas/Bill"
+					}
+				},
+				"required": [
+					"id",
+					"showtime",
+					"seat",
+					"bill"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Seat": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"seatNumber": {
+						"type": "string"
+					},
+					"row": {
+						"type": "number",
+						"format": "double"
+					},
+					"col": {
+						"type": "number",
+						"format": "double"
+					},
+					"screen": {
+						"$ref": "#/components/schemas/Screen"
+					},
+					"tickets": {
+						"items": {
+							"$ref": "#/components/schemas/Ticket"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"seatNumber",
+					"row",
+					"col",
+					"screen",
+					"tickets"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Bill": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"orderCode": {
+						"type": "string"
+					},
+					"totalPrice": {
+						"type": "number",
+						"format": "double"
+					},
+					"statusOrder": {
+						"$ref": "#/components/schemas/StatusOrder"
+					},
+					"bookingTime": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"reservation_time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"expiration_time": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"paymentMethod": {
+						"$ref": "#/components/schemas/MethodPayment"
+					},
+					"user": {
+						"$ref": "#/components/schemas/User"
+					},
+					"tickets": {
+						"items": {
+							"$ref": "#/components/schemas/Ticket"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"orderCode",
+					"totalPrice",
+					"statusOrder",
+					"bookingTime",
+					"reservation_time",
+					"expiration_time",
+					"paymentMethod",
+					"user",
+					"tickets"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RepositoryDTO_void-or-User_": {
+				"properties": {
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"message": {},
+					"data": {
+						"anyOf": [
+							{},
+							{
+								"$ref": "#/components/schemas/User"
+							}
+						]
+					}
+				},
+				"required": [
+					"status",
+					"message",
+					"data"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RegisterModel": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"username": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"password",
+					"phone",
+					"username"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {
+			"JWT": {
+				"type": "apiKey",
+				"name": "Authorization",
+				"in": "header"
+			},
+			"tsoa_auth": {
+				"type": "oauth2",
+				"flows": {
+					"implicit": {
+						"authorizationUrl": "http://swagger.io/api/oauth/dialog",
+						"scopes": {
+							"write:pets": "modify things",
+							"read:pets": "read things"
+						}
+					}
+				}
+			}
+		}
+	},
+	"info": {
+		"title": ""
+	},
+	"paths": {
+		"/user": {
+			"delete": {
+				"operationId": "DeleteArray",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DeleteModel"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "orderBy",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/TypeSort"
+						}
+					},
+					{
+						"in": "query",
+						"name": "username",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin",
+							"user"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UserModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/user/getMe": {
+			"get": {
+				"operationId": "GetMe",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin",
+							"user"
+						]
+					}
+				],
+				"parameters": []
+			},
+			"delete": {
+				"operationId": "DeleteMe",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/user/password": {
+			"put": {
+				"operationId": "UpdatePassword",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin",
+							"user"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PasswordModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/user/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "BanUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "Delete",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/Theater": {
+			"get": {
+				"operationId": "GetFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Lọc rạp chiếu phim",
+				"tags": [
+					"Theater Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "orderBy",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/TypeSort"
+						}
+					},
+					{
+						"in": "query",
+						"name": "name",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "city",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "address",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "Create",
+				"responses": {
+					"201": {
+						"description": "Create",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Theater Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TheaterModel"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteArray",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Theater Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DeleteModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/Theater/createArray": {
+			"post": {
+				"operationId": "CreateArray",
+				"responses": {
+					"201": {
+						"description": "Create",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Theater Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"items": {
+									"$ref": "#/components/schemas/TheaterModel"
+								},
+								"type": "array"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/Theater/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Theater Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "Update",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Theater Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TheaterModel"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "Delete",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Theater Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/Showtime": {
+			"get": {
+				"operationId": "GetFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Lọc thể loại thời gian chiếu phim",
+				"tags": [
+					"Showtime Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "orderBy",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/TypeSort"
+						}
+					},
+					{
+						"in": "query",
+						"name": "showDate",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "movieId",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "screenId",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "Create",
+				"responses": {
+					"201": {
+						"description": "Create",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Showtime Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ShowtimeModel"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteArray",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Showtime Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DeleteModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/Showtime/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Showtime Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "Update",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Showtime Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ShowtimeModel"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "Delete",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Showtime Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/Seat": {
+			"get": {
+				"operationId": "GetFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Lọc ghế của rạp chiếu phim",
+				"tags": [
+					"Seat Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "orderBy",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/TypeSort"
+						}
+					},
+					{
+						"in": "query",
+						"name": "seatNumber",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "screenId",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "Create",
+				"responses": {
+					"201": {
+						"description": "Create",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Seat Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SeatModel"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteArray",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Seat Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DeleteModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/Seat/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Seat Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "Update",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Seat Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SeatModel"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "Delete",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Seat Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/Screen": {
+			"get": {
+				"operationId": "GetFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Lọc phòng chiếu phim",
+				"tags": [
+					"Screen Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "orderBy",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/TypeSort"
+						}
+					},
+					{
+						"in": "query",
+						"name": "theaterId",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "Create",
+				"responses": {
+					"201": {
+						"description": "Create",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Screen Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ScreenModel"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteArray",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Screen Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DeleteModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/Screen/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Screen Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "Update",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Screen Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ScreenModel"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "Delete",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Screen Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/Review": {
+			"get": {
+				"operationId": "GetFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Lọc thể loại đồ ăn thêm tên,page,pagesize,với sắp xếp",
+				"tags": [
+					"Review Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "orderBy",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/TypeSort"
+						}
+					},
+					{
+						"in": "query",
+						"name": "userId",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "rating",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "movieId",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "Create",
+				"responses": {
+					"201": {
+						"description": "Create",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Review Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin",
+							"user"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteArray",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Review Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin",
+							"user"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DeleteModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/Review/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Review Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "Update",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Review Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin",
+							"user"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ReviewModel"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "Delete",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Review Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin",
+							"user"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/payment/momo": {
+			"post": {
+				"operationId": "CreatePaymentMoMo",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Payment Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin",
+							"user"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PaymentModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/payment/stripe": {
+			"post": {
+				"operationId": "CreatePaymentStripe",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Payment Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin",
+							"user"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PaymentModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/payment/checkStautsMomo": {
+			"put": {
+				"operationId": "CheckStatusMomo",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Payment Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin",
+							"user"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"orderCode": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"orderCode"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/payment/checkStautsStripe": {
+			"put": {
+				"operationId": "CheckStatusStripe",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO__status-stripe.Stripe.Checkout.Session.Status--payment_status-stripe.Stripe.Checkout.Session.PaymentStatus--customer_email-string__"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Payment Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin",
+							"user"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "session_id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/Movie": {
+			"get": {
+				"operationId": "GetFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Lọc phim",
+				"tags": [
+					"Movie Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "orderBy",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/TypeSort"
+						}
+					},
+					{
+						"in": "query",
+						"name": "title",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "genreId",
+						"required": false,
+						"schema": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						}
+					},
+					{
+						"in": "query",
+						"name": "statusMovieEnum",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "Create",
+				"responses": {
+					"201": {
+						"description": "Create",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Movie Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MovieModel"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteArray",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Movie Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DeleteModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/Movie/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Movie Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "Update",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Movie Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MovieModel"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "Delete",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Movie Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/Genre": {
+			"get": {
+				"operationId": "GetFilter",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"description": "Lọc thể loại phim theo tên",
+				"tags": [
+					"Genre Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "orderBy",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/TypeSort"
+						}
+					},
+					{
+						"in": "query",
+						"name": "name",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "Create",
+				"responses": {
+					"201": {
+						"description": "Create",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Genre Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/GenreModel"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteArray",
+				"responses": {
+					"204": {
+						"description": "No content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Genre Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DeleteModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/Genre/createArray": {
+			"post": {
+				"operationId": "CreateArray",
+				"responses": {
+					"201": {
+						"description": "Create",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Genre Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"items": {
+									"$ref": "#/components/schemas/GenreModel"
+								},
+								"type": "array"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/Genre/{id}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Genre Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "Update",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Genre Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/GenreModel"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "Delete",
+				"responses": {
+					"204": {
+						"description": "No content",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Genre Controller"
+				],
+				"security": [
+					{
+						"JWT": [
+							"admin"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/login": {
+			"post": {
+				"operationId": "Login",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Auth Controller"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/LoginModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/logout": {
+			"get": {
+				"operationId": "Logout",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_unknown_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Auth Controller"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/register": {
+			"post": {
+				"operationId": "Register",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_void-or-User_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Auth Controller"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RegisterModel"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/refreshToken": {
+			"get": {
+				"operationId": "RefreshToken",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Auth Controller"
+				],
+				"security": [],
+				"parameters": []
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/api"
+		}
+	]
+}

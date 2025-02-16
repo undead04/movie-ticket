@@ -1,122 +1,109 @@
-import { NextFunction,Request,Response } from "express";
-import { IShowtimeModel } from "../Model/ShowtimeModel";
-import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
-import { IDataDeleteModel } from "../Model/dataModel";
-import ShowtimeService from './../Service/ShowtimeService';
-import { AutoBind } from "../utils/AutoBind";
-import { parseNumber } from "../utils/ConverEnum";
+import { Showtime } from "../entitys/Showtime";
+import { notFound, notFoundArray } from "../middlewares/NotFoundHandle";
+import validateError from "../middlewares/ValidateErrorDTO";
+import { DeleteModel } from "../models/modelRequest/DeleteModel";
+import { ShowtimeFilter } from "../models/modelRequest/FilterModel";
+import { ShowtimeModel } from "../models/modelRequest/ShowtimeModel";
+import ShowtimeService from "../services/ShowtimeService";
+import BaseController from "../utils/BaseController";
+import {
+  Body,
+  Delete,
+  Get,
+  Middlewares,
+  Path,
+  Post,
+  Put,
+  Queries,
+  Route,
+  Security,
+  SuccessResponse,
+  Tags,
+} from "tsoa";
+@Route("/Showtime")
+@Tags("Showtime Controller")
+export class ShowtimeController extends BaseController<ShowtimeService> {
+  constructor() {
+    const service = new ShowtimeService();
+    super(service);
+  }
+  /**
+   *Lọc thể loại thời gian chiếu phim
+   */
+  @Get("/")
+  async getFilter(@Queries() filter: ShowtimeFilter) {
+    return await super.getFilter({
+      ...filter,
+      page: filter.page || 1,
+      pageSize: filter.pageSize || 10,
+    });
+  }
+  @Post("/")
+  /**
+   * Thêm bản ghi thời gian chiếu phim
+   *
+   */
+  @Security("JWT", ["admin"])
+  @Middlewares([validateError(ShowtimeModel)])
+  @SuccessResponse(201, "Create")
+  async create(@Body() data: ShowtimeModel) {
+    return await super.create({
+      ...data,
+      movie: { id: data.movieId },
+      screen: { id: data.screenId },
+    });
+  }
 
-export default class ShowtimeController{
-    showtimeService:ShowtimeService
-    constructor(){
-        this.showtimeService = new ShowtimeService()
-    }
-    @AutoBind
-    async getAllWithFilterAndPagination (req: Request, res: Response, next: NextFunction): Promise<void>  {
-        try {
-            const { movieId, showDate, screenId,page, pageSize,orderBy,sort } = req.query;
-            // Chuyển đổi các tham số từ query string
-            const pageNumber = Number(page) || 1;
-            const pageSizeNumber = Number(pageSize) || 10;
-            const orderByField=orderBy as string;
-            const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";
-            const showDateString = showDate as string
-            const movieNumebr = Number(movieId)
-            const screenIdNumner = parseNumber(screenId)
-            const data = await this.showtimeService.getFillter(showDateString,movieNumebr,screenIdNumner,orderByField,sortOrder,pageNumber,pageSizeNumber)
-            res.status(200).json(RepositoryDTO.WithData(200,data));
-    
-        } catch (error: any) {
-            console.error(error);
-            next(error)
-        }
-    };
-    
-    @AutoBind
-    async get (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-          
-            const id=Number(req.params.id);
-            const data = await this.showtimeService.get(id)
-            res.status(200).json(RepositoryDTO.WithData(200,data))
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    
-    }
-    @AutoBind
-    async remove (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-           const id=Number(req.params.id)
-           await this.showtimeService.remove(id)
-            res.status(200).json(RepositoryDTO.Success("Xóa thời gian chiếu phim thành công"))
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    
-    }
-    @AutoBind
-    async create (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-          
-            const model:IShowtimeModel = req.body
-            await this.showtimeService.create(model)
-            res.status(200).json(RepositoryDTO.Success("Tạo thời gian thành công"))
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    
-    }
-    @AutoBind
-    async update (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-            const id=Number(req.params.id);
-            const model:IShowtimeModel=req.body;
-            await this.showtimeService.update(id,model)
-             res.status(200).json(RepositoryDTO.Success("Cập nhập lịch chiếu phim thành công"))
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    
-    }
-    @AutoBind
-    async removeArray (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-            const model:IDataDeleteModel=req.body;
-            await this.showtimeService.removeArray(model.ids)
-            res.status(200).json(RepositoryDTO.Success("Xóa các lịch chiếu phim này thành công"))
-         }catch(error:any){
-             console.log(error)
-             next(error)
-         }
-    }
-    @AutoBind
-    async createArray (req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-          
-            // Tạo đối tượng từ request body
-            const models:IShowtimeModel[]=req.body;
-            await this.showtimeService.createArray(models)
-            res.status(200).json(RepositoryDTO.Success("Tạo danh sách thời gian phim thành công thành công"))
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    
-    }
-    @AutoBind
-    async waningDelete(req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-            const ids = req.body.ids
-            await this.showtimeService.waningDelete(ids)
-            res.status(200).json()
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    }
+  @Get("{id}")
+  /**
+   * Lấy một bản ghi thời gian chiếu phim
+   *
+   */
+  async getOne(@Path() id: number) {
+    return await super.getOne(id);
+  }
+
+  // UPDATE - Cập nhật bản ghi
+  @Put("{id}")
+  /**
+   * Cập nhập thời gian chiế phim
+   * @example id "1"
+   */
+  @Security("JWT", ["admin"])
+  @Middlewares([notFound(Showtime, "showtime"), validateError(ShowtimeModel)])
+  async update(@Path() id: number, @Body() data: ShowtimeModel) {
+    return await super.update(id, {
+      showDate: data.showDate,
+      endTime: data.endTime,
+      startTime: data.endTime,
+      screen: { id: data.screenId },
+      movie: { id: data.movieId },
+      price: data.price,
+    });
+  }
+
+  @Delete("{id}")
+  /**
+   * Xóa một bản ghi thời gian chiếu phim
+   * @example id 1
+   */
+  @Security("JWT", ["admin"])
+  async delete(@Path() id: number) {
+    return await super.delete(id);
+  }
+  @Security("JWT", ["admin"])
+  @Delete("/")
+  @Middlewares([
+    notFoundArray(Showtime, "showtime"),
+    validateError(DeleteModel),
+  ])
+  /**
+   * Xóa một mảng bản ghi thời gian chiếu phim
+   * @example{
+   * "ids":[1,2,3]
+   * }
+   */
+  async deleteArray(@Body() data: DeleteModel) {
+    return await super.deleteArray(data);
+  }
 }

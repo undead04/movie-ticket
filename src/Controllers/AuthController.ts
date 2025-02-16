@@ -1,61 +1,119 @@
-import { NextFunction,Request,Response } from "express";
-import { LoginModel, UserModel } from "../Model/UserModel";
-import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
-import UserService from "../Service/UserService";
-import { AutoBind } from "../utils/AutoBind";
+import UserService from "../services/UserService";
+import { LoginModel, RegisterModel } from "../models/modelRequest/UserModel";
+import { RepositoryDTO } from "../utils/ReponseDTO";
+import jwt from "jsonwebtoken";
+import {
+  Body,
+  Controller,
+  Example,
+  Get,
+  Middlewares,
+  Post,
+  Request,
+  Route,
+  Tags,
+} from "tsoa";
+import validateError from "../middlewares/ValidateErrorDTO";
+import { UserToken } from "../middlewares/authentication";
 
-export default class AuthController{
-  userService:UserService
-  constructor(){
-    this.userService = new UserService()
+@Route()
+@Tags("Auth Controller")
+export class AuthController extends Controller {
+  userService: UserService;
+  constructor() {
+    super();
+    this.userService = new UserService();
   }
-  @AutoBind
-  async login(req:Request,res:Response,next:NextFunction):Promise<void>{
-    try{
-        const model: LoginModel=req.body
-        const userData=await this.userService.get(model.email,'email')
-        const result=await this.userService.generateToken(userData,model.password)
-        if(result==null) {
-          res.status(400).json(RepositoryDTO.Error(400,"Mật khẩu hoặc email sai"))
-          return
-        }
-        res.cookie("authToken", result, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'strict', // Giảm thiểu CSRF
-            maxAge: 3*60 * 60 * 1000 // 1 giờ
-        }); 
-        res.status(200).json(RepositoryDTO.WithData(200,userData))
-    }catch(error:any){
-        console.log(error)
-        next(error)
+  @Post("/login")
+  @Middlewares([validateError(LoginModel)])
+  async login(@Body() model: LoginModel) {
+    try {
+      // Kiểm tra thông tin người dùng đăng nhập
+      const userData = await this.userService.isLogin(model);
+      // Nếu thông tin đăng nhập không đúng
+      if (userData == null) {
+        this.setStatus(400);
+        return RepositoryDTO.Error(400, "Mật khẩu hoặc tên người dùng sai sai");
+      }
+      const user: UserToken = {
+        id: userData.id,
+      };
+      // Tạo refresh token và access token
+      const refreshToken = await this.userService.createRefreshToken(user);
+      const accessToken = await this.userService.createAccessToken(user);
+      this.setHeader(
+        "Set-Cookie",
+        `refreshToken=${refreshToken}; HttpOnly; Secure; SameSite=Strict; Max-Age=${
+          7 * 24 * 60 * 60
+        }`
+      );
+      // Trả về response với dữ liệu người dùng và access token
+      return RepositoryDTO.WithData(200, "Đăng nhập thành công", {
+        ...userData,
+        token: accessToken,
+      });
+    } catch (error: any) {
+      console.error(error); // Log lỗi chi tiết
     }
   }
-  @AutoBind
-  async logout (req:Request,res:Response,next:NextFunction){
-      try {
-          // Xóa cookie authToken
-          res.clearCookie('authToken', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-          });
-          // Trả về phản hồi thành công
-          res.status(200).json(RepositoryDTO.Success("Đăng xuất thành công"));
-        } catch (error) {
-          console.log(error);
-          res.status(500).json({ message: 'Có lỗi xảy ra khi đăng xuất' });
-        }
-  }
-    @AutoBind
-    async register (req:Request,res:Response,next:NextFunction){
-    try{
-        const model:UserModel=req.body
-        const data = await this.userService.create(model)
-        res.status(200).json(RepositoryDTO.WithData(200,data))
-    }catch(error:any){
-        console.log(error);
-        next(error)
+  @Get("/logout")
+  async logout() {
+    try {
+      // Xóa cookie authToken
+      // Đặt cookie với Max-Age = 0 để xóa nó
+      this.setHeader(
+        "Set-Cookie",
+        `refreshToken=; HttpOnly; Secure; SameSite=Strict; Max-Age=0`
+      );
+      // Trả về phản hồi thành công
+      return RepositoryDTO.Success("Đăng xuất thành công", 200);
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
-}
+  }
+  @Post("/register")
+  @Middlewares(validateError(RegisterModel))
+  async register(@Body() model: RegisterModel) {
+    try {
+      const data = await this.userService.create(model);
+      return RepositoryDTO.WithData(200, "Đăng kí thành công", data);
+    } catch (error: any) {
+      console.log(error);
+      throw error;
+    }
+  }
+  @Get("/refreshToken")
+  async refreshToken(@Request() req: any) {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+      if (!refreshToken) {
+        this.setStatus(401);
+        return RepositoryDTO.Error(401, "Không có refresh token");
+      }
+      // Sử dụng Promise thay cho callback
+      const user: UserToken = await new Promise((resolve, reject) => {
+        jwt.verify(refreshToken, "refreshToken", (err, decoded) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(decoded);
+          }
+        });
+      });
+      const accessToken = await this.userService.createAccessToken(user);
+      return RepositoryDTO.WithData(
+        200,
+        "Cấp lại token thành công",
+        accessToken
+      );
+    } catch (error) {
+      if (error.name === "JsonWebTokenError") {
+        this.setStatus(403);
+        return RepositoryDTO.Error(403, "Refresh token không hợp lệ");
+      }
+      console.error(error);
+      throw error; // Ném lỗi để middleware xử lý lỗi toàn cục
+    }
+  }
 }

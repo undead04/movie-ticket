@@ -1,81 +1,99 @@
-import { NextFunction,Request,Response } from "express";
-import { RepositoryDTO } from "../Model/DTO/RepositoryDTO";
-import { PasswordModel, UserUpdateModel } from "../Model/UserModel";
-import { AuthRequest } from "../Middlewares/Auth";
-import UserService from "../Service/UserService";
-import { AutoBind } from "../utils/AutoBind";
-import { parseString } from "../utils/ConverEnum";
+import BaseController from "../utils/BaseController";
+import { DeleteModel } from "../models/modelRequest/DeleteModel";
+import UserService from "../services/UserService";
+import { notFound, notFoundArray } from "../middlewares/NotFoundHandle";
+import { statusUser, User } from "../entitys/User";
+import validateError from "../middlewares/ValidateErrorDTO";
+import { PasswordModel, UserModel } from "../models/modelRequest/UserModel";
+import {
+  Body,
+  Delete,
+  Get,
+  Middlewares,
+  Path,
+  Request,
+  Put,
+  Queries,
+  Route,
+  Security,
+  Tags,
+} from "tsoa";
+import { UserFilter } from "../models/modelRequest/FilterModel";
+import { UserToken } from "middlewares/authentication";
+@Route("/user")
+@Tags("User Controller")
+export class UserController extends BaseController<UserService> {
+  constructor() {
+    const service = new UserService();
+    super(service);
+  }
+  @Delete("/")
+  @Middlewares([notFoundArray(User, "user"), validateError(DeleteModel)])
+  @Security("JWT", ["admin"])
+  async deleteArray(@Body() data: DeleteModel) {
+    return await super.deleteArray(data);
+  }
+  @Get("/getMe")
+  @Security("JWT", ["admin", "user"])
+  async getMe(@Request() req: any) {
+    try {
+      const user = req.user;
+      const record = await this.service.getById(user.id);
+      return this.sendResponse(record);
+    } catch (error: any) {
+      console.log(error);
+      throw error;
+    }
+  }
+  @Put("/password")
+  @Middlewares(validateError(PasswordModel))
+  @Security("JWT", ["admin", "user"])
+  async updatePassword(@Request() req: any, @Body() data: PasswordModel) {
+    try {
+      const user: UserToken = req.user;
+      await this.service.updatePassword(user.id, data);
+      return this.sendSuccess("Cập nhập mật khẩu thành công", 200);
+    } catch (error: any) {
+      console.log(error);
+      throw error;
+    }
+  }
+  @Get("{id}")
+  @Security("JWT", ["admin"])
+  async getOne(@Path("id") id: number) {
+    return await super.getOne(id);
+  }
+  @Get("/")
+  @Security("JWT", ["admin"])
+  async getFilter(@Queries() filter: UserFilter) {
+    return await super.getFilter({
+      ...filter,
+      page: filter.page || 1,
+      pageSize: filter.pageSize || 10,
+    });
+  }
+  @Put("{id}")
+  @Middlewares(notFound(User, "user"))
+  async banUser(@Path("id") id: number) {
+    return await super.update(id, { status: statusUser.ban });
+  }
+  @Put("/")
+  @Middlewares(validateError(UserModel))
+  @Security("JWT", ["admin", "user"])
+  async updateUser(@Request() req: any, @Body() data: UserModel) {
+    const user: UserToken = req.user;
+    return await super.update(user.id, data);
+  }
 
-export default class UserController{
-    protected userService:UserService
-    constructor(){
-        this.userService = new UserService()
-    }
-    @AutoBind
-    async getAllWithFilterAndPagination(req:Request,res:Response,next:NextFunction):Promise<void>{
-        try{
-            const {email,page,pageSize,orderBy,sort}=req.query;
-            const pageNumber = Number(page) || 1;
-            const pageSizeNumber = Number(pageSize) || 10;
-            const orderByField=orderBy as string;
-            const emailString = parseString(email)
-            const sortOrder: "ASC" | "DESC" = (sort as "ASC" | "DESC") || "ASC";  // Đảm bảo sortOrder có giá trị hợp lệ
-            const data=await this.userService.getFillter(emailString,orderByField,sortOrder,pageNumber,pageSizeNumber)
-            res.status(200).json(RepositoryDTO.WithData(200,data))
-            
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    
-    }
-    @AutoBind
-    async get(req:Request,res:Response,next:NextFunction):Promise<void> {
-        try{
-            const id=Number(req.params.id);
-            const record = await this.userService.get(id)
-            res.status(200).json(RepositoryDTO.WithData(200,record))
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    
-    }
-    @AutoBind
-    async update(req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
-        try{
-            const id=req._id
-            const model:UserUpdateModel=req.body;
-            await this.userService.update(id,model)
-            res.status(200).json(RepositoryDTO.Success("Cập nhập người dùng thành công"))
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    
-    }
-    @AutoBind
-    async updatePassword (req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
-            try{
-                const id=req._id
-                const model:PasswordModel=req.body;
-                await this.userService.updatePassword(id,model)
-            res.status(200).json(RepositoryDTO.Success("Cập nhập người dùng thành công"))
-            }catch(error:any){
-                console.log(error)
-                next(error)
-            }
-    }
-    @AutoBind
-    async userGetMy(req:AuthRequest,res:Response,next:NextFunction):Promise<void>{
-        try{
-            const id=req._id
-            console.log(id)
-            const data = await this.userService.get(id);
-            res.status(200).json(data)
-        }catch(error:any){
-            console.log(error)
-            next(error)
-        }
-    }
+  @Delete("{id}")
+  @Security("JWT", ["admin"])
+  async delete(@Path("id") id: number) {
+    return await super.delete(id);
+  }
+  @Delete("/getMe")
+  @Security("JWT", ["admin"])
+  async deleteMe(@Request() req: any) {
+    const user = req.user;
+    return await super.delete(user.id);
+  }
 }
