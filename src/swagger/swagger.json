@@ -195,15 +195,15 @@
 						"type": "number",
 						"format": "double"
 					},
+					"theaterId": {
+						"type": "number",
+						"format": "double"
+					},
 					"screenId": {
 						"type": "number",
 						"format": "double"
 					}
 				},
-				"required": [
-					"showDate",
-					"screenId"
-				],
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -1270,7 +1270,9 @@
 		}
 	},
 	"info": {
-		"title": ""
+		"title": "API Vé xem phim",
+		"version": "1.00",
+		"description": "Một dự án API quản lí và đặt vé xem phim tích hợp thanh toán trực tuyến momo,stripe, database:mysql"
 	},
 	"paths": {
 		"/user": {
@@ -2011,7 +2013,7 @@
 					{
 						"in": "query",
 						"name": "showDate",
-						"required": true,
+						"required": false,
 						"schema": {
 							"type": "string"
 						}
@@ -2027,8 +2029,17 @@
 					},
 					{
 						"in": "query",
+						"name": "theaterId",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
 						"name": "screenId",
-						"required": true,
+						"required": false,
 						"schema": {
 							"format": "double",
 							"type": "number"
@@ -2475,6 +2486,38 @@
 					{
 						"in": "path",
 						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/Seat/statusSeat/{showtimeId}": {
+			"get": {
+				"operationId": "StatusSeat",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RepositoryDTO_any_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Seat Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "showtimeId",
 						"required": true,
 						"schema": {
 							"format": "double",

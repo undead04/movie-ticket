@@ -39,9 +39,13 @@ export interface UserFilter extends filterPagination, filterSort {
   username?: string;
 }
 export interface ShowtimeFilter extends filterPagination, filterSort {
-  showDate: string;
+  showDate?: string;
   movieId?: number;
-  screenId: number;
+  theaterId?: number;
+  screenId?: number;
+}
+export interface statusSeatFilter {
+  showtimeId: number;
 }
 export interface BillFilter extends filterPagination, filterSort {
   orderCode?: string;

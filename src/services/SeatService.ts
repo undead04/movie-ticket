@@ -8,6 +8,7 @@ import BaseRepository from "../utils/BaseRepository";
 import CustomError from "../utils/CustumError";
 import { SeatFilter, TypeSort } from "../models/modelRequest/FilterModel";
 import { SeatModel } from "../models/modelRequest/SeatModel";
+import { StatusOrder } from "entitys/Bill";
 
 export default class SeatService extends BaseService<Seat> {
   protected screenRepository: BaseRepository<Screen>;
@@ -151,5 +152,40 @@ export default class SeatService extends BaseService<Seat> {
     await this.limitSeat(data.screenId, 1);
     await this.validate(0, data);
     await super.create(data);
+  }
+  async statusSeatOfShowtime(showtimeId: number) {
+    const showtime = await (await this.showtimeRepository.getBy(showtimeId))
+      .innerJoinAndSelect("showtime.screen", "screen")
+      .getOne();
+    if (showtime == null)
+      throw new CustomError("Không tìm thấy thời gian chiếu phiêu này", 404);
+    const data = await (
+      await this.repository.createQueryBuilder()
+    )
+      .leftJoin("seat.tickets", "ticket", "ticket.showtimeId =:showtimeId", {
+        showtimeId,
+      })
+      .leftJoin(
+        "ticket.bill",
+        "bill",
+        "bill.statusOrder = :statusOrder or bill.statusOrder =:statusOrder2",
+        {
+          statusOrder: StatusOrder.complete,
+          statusOrder2: StatusOrder.pending,
+        }
+      )
+      .select([
+        "seat.id as id",
+        "seat.seatNumber as seatNumber",
+        "seat.row as row",
+        "seat.col as col",
+      ])
+      .addSelect([
+        `CASE 
+        WHEN ticket.id is null THEN false else true
+      END as statusSeat`,
+      ])
+      .getRawMany();
+    return data;
   }
 }

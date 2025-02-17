@@ -134,9 +134,10 @@ const models: TsoaRoute.Models = {
             "pageSize": {"dataType":"double"},
             "orderBy": {"dataType":"string"},
             "sort": {"ref":"TypeSort"},
-            "showDate": {"dataType":"string","required":true},
+            "showDate": {"dataType":"string"},
             "movieId": {"dataType":"double"},
-            "screenId": {"dataType":"double","required":true},
+            "theaterId": {"dataType":"double"},
+            "screenId": {"dataType":"double"},
         },
         "additionalProperties": false,
     },
@@ -1434,6 +1435,36 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'deleteArray',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsSeatController_statusSeat: Record<string, TsoaRoute.ParameterSchema> = {
+                showtimeId: {"in":"path","name":"showtimeId","required":true,"dataType":"double"},
+        };
+        app.get('/api/Seat/statusSeat/:showtimeId',
+            ...(fetchMiddlewares<RequestHandler>(SeatController)),
+            ...(fetchMiddlewares<RequestHandler>(SeatController.prototype.statusSeat)),
+
+            async function SeatController_statusSeat(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsSeatController_statusSeat, request, response });
+
+                const controller = new SeatController();
+
+              await templateService.apiHandler({
+                methodName: 'statusSeat',
                 controller,
                 response,
                 next,

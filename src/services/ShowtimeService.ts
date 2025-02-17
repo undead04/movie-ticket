@@ -54,33 +54,36 @@ export default class ShowtimeService extends BaseService<Showtime> {
     }
   }
   async getFilter(filter: ShowtimeFilter) {
-    const { showDate, screenId, movieId, orderBy, sort } = filter;
+    const { showDate, screenId, theaterId, movieId, orderBy, sort } = filter;
     // Tạo QueryBuilder cho Showtime
-    let queryBuilder = await this.repository.createQueryBuilder();
+    const queryBuilder = await this.repository.createQueryBuilder();
     // Thêm các JOIN
-    queryBuilder = queryBuilder
+    queryBuilder
       .leftJoinAndSelect("showtime.movie", "movie")
-      .leftJoinAndSelect("showtime.screen", "screen");
+      .leftJoinAndSelect("showtime.screen", "screen")
+      .innerJoinAndSelect("screen.theater", "theater");
     // Thêm điều kiện lọc theo movieId nếu có
     if (movieId) {
-      queryBuilder = queryBuilder.andWhere("showtime.movieId = :movieId", {
+      queryBuilder.andWhere("showtime.movieId = :movieId", {
         movieId,
       });
     }
     // Thêm điều kiện lọc theo showDate nếu có
     if (showDate) {
-      queryBuilder = queryBuilder.andWhere("showtime.showDate = :showDate", {
+      queryBuilder.andWhere("showtime.showDate = :showDate", {
         showDate,
       });
     }
     if (screenId) {
-      console.log(screenId);
-      queryBuilder = queryBuilder.andWhere("showtime.screenId=:screenId", {
+      queryBuilder.andWhere("showtime.screenId=:screenId", {
         screenId,
       });
     }
+    if (theaterId) {
+      queryBuilder.andWhere("screen.theaterId =:theaterId", { theaterId });
+    }
     if (orderBy) {
-      queryBuilder = queryBuilder.orderBy(
+      queryBuilder.orderBy(
         `showtime.${orderBy}`,
         sort == TypeSort.ASC ? "ASC" : "DESC"
       );

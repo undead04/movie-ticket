@@ -1,3 +1,4 @@
+import { title } from "process";
 import {
   generateRoutes,
   generateSpec,
@@ -30,6 +31,10 @@ import {
         },
       },
     },
+    version: "1.00",
+    description:
+      "Một dự án API quản lí và đặt vé xem phim tích hợp thanh toán trực tuyến momo,stripe, database:mysql",
+    name: "API Vé xem phim",
   };
   const routeOptions: ExtendedRoutesConfig = {
     basePath: "/api",

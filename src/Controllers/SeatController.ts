@@ -97,4 +97,14 @@ export class SeatController extends BaseController<SeatService> {
   async deleteArray(@Body() data: DeleteModel) {
     return await super.deleteArray(data);
   }
+  @Get("/statusSeat/{showtimeId}")
+  async statusSeat(@Path("showtimeId") showtimeId: number) {
+    try {
+      const data = await this.service.statusSeatOfShowtime(showtimeId);
+      return super.sendResponse(data);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
 }
