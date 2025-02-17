@@ -5,6 +5,8 @@ import BaseRepository from "utils/BaseRepository";
 import { Showtime } from "entitys/Showtime";
 import BillService from "./BillService";
 import { StatusOrder } from "entitys/Bill";
+import CustomError from "utils/CustumError";
+import EmailService from "./EmailService";
 
 export enum StatusStripe {
   open,
@@ -18,6 +20,7 @@ export default class StripeService {
   protected movieService = new MovieService();
   protected billService = new BillService();
   protected stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  protected emailServie = new EmailService();
   protected YOUR_DOMAIN = "http://localhost:5000";
   async createStripePaymentIntent(model: StripeModel) {
     const showtime = await (await this.showitmeRepo.getBy(model.showtimeId))
@@ -56,12 +59,22 @@ export default class StripeService {
     const session = await this.stripe.checkout.sessions.retrieve(session_id);
     // Truy xuất ID hóa đơn từ metadata
     const orderCode = session.metadata.orderCode;
-    console.log(session.status);
+    const dataBill = await this.billService.getBillCode(orderCode);
+    if (dataBill.statusOrder != StatusOrder.pending) {
+      throw new CustomError("Không thể cập nhập hóa đơn nữa", 400);
+    }
+    if (dataBill == null)
+      throw new CustomError("Không tồn tại hóa đơn này", 404);
     switch (session.status) {
       case "complete":
         await this.billService.updateStatusBill(
           orderCode,
           StatusOrder.complete
+        );
+        await this.emailServie.sendEmail(
+          dataBill.user.email,
+          "Thông báo giao dịch thành công mua vé xem phim",
+          dataBill
         );
         break;
       case "expired":

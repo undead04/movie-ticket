@@ -418,14 +418,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"stripe.Stripe.Checkout.Session.Status": {
-				"type": "string",
-				"enum": [
-					"complete",
-					"expired",
-					"open"
-				]
-			},
 			"stripe.Stripe.Checkout.Session.PaymentStatus": {
 				"type": "string",
 				"enum": [
@@ -434,7 +426,7 @@
 					"unpaid"
 				]
 			},
-			"RepositoryDTO__status-stripe.Stripe.Checkout.Session.Status--payment_status-stripe.Stripe.Checkout.Session.PaymentStatus--customer_email-string__": {
+			"RepositoryDTO__status-open--payment_status_63_-undefined--customer_email_63_-undefined_-or-_status-complete-or-expired--payment_status-stripe.Stripe.Checkout.Session.PaymentStatus--customer_email-string__": {
 				"properties": {
 					"status": {
 						"type": "number",
@@ -442,23 +434,48 @@
 					},
 					"message": {},
 					"data": {
-						"properties": {
-							"customer_email": {
-								"type": "string"
+						"anyOf": [
+							{
+								"properties": {
+									"customer_email": {},
+									"payment_status": {},
+									"status": {
+										"type": "string",
+										"enum": [
+											"open"
+										],
+										"nullable": false
+									}
+								},
+								"required": [
+									"status"
+								],
+								"type": "object"
 							},
-							"payment_status": {
-								"$ref": "#/components/schemas/stripe.Stripe.Checkout.Session.PaymentStatus"
-							},
-							"status": {
-								"$ref": "#/components/schemas/stripe.Stripe.Checkout.Session.Status"
+							{
+								"properties": {
+									"customer_email": {
+										"type": "string"
+									},
+									"payment_status": {
+										"$ref": "#/components/schemas/stripe.Stripe.Checkout.Session.PaymentStatus"
+									},
+									"status": {
+										"type": "string",
+										"enum": [
+											"complete",
+											"expired"
+										]
+									}
+								},
+								"required": [
+									"customer_email",
+									"payment_status",
+									"status"
+								],
+								"type": "object"
 							}
-						},
-						"required": [
-							"customer_email",
-							"payment_status",
-							"status"
-						],
-						"type": "object"
+						]
 					}
 				},
 				"required": [
@@ -1593,6 +1610,35 @@
 						"schema": {
 							"format": "double",
 							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/ticket/{orderCode}": {
+			"get": {
+				"operationId": "GetTickets",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Ticket Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "orderCode",
+						"required": true,
+						"schema": {
+							"type": "string"
 						}
 					}
 				]
@@ -2805,7 +2851,9 @@
 					"required": true,
 					"content": {
 						"application/json": {
-							"schema": {}
+							"schema": {
+								"$ref": "#/components/schemas/ReviewModel"
+							}
 						}
 					}
 				}
@@ -3098,7 +3146,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/RepositoryDTO__status-stripe.Stripe.Checkout.Session.Status--payment_status-stripe.Stripe.Checkout.Session.PaymentStatus--customer_email-string__"
+									"$ref": "#/components/schemas/RepositoryDTO__status-open--payment_status_63_-undefined--customer_email_63_-undefined_-or-_status-complete-or-expired--payment_status-stripe.Stripe.Checkout.Session.PaymentStatus--customer_email-string__"
 								}
 							}
 						}

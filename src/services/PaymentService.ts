@@ -9,10 +9,12 @@ import StripeService from "./StripeService";
 import { StripeModel } from "models/modelRequest/StripeModel";
 import { StatusOrder } from "entitys/Bill";
 import CustomError from "../utils/CustumError";
+import EmailService from "./EmailService";
 export default class PaymentService {
   protected billService = new BillService();
   protected momoService = new MomoService();
   protected stripeService = new StripeService();
+  protected emailService = new EmailService();
   async createBill(model: IPaymentModel) {
     const order = await this.billService.create(model);
     switch (model.paymentMethod) {
@@ -50,6 +52,11 @@ export default class PaymentService {
         await this.billService.updateStatusBill(
           dataBill.orderCode,
           StatusOrder.complete
+        );
+        await this.emailService.sendEmail(
+          dataBill.user.email,
+          "Thông báo giao dịch thành công mua vé xem phim",
+          dataBill
         );
         break;
       case 98:

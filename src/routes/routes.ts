@@ -233,22 +233,17 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "stripe.Stripe.Checkout.Session.Status": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["complete"]},{"dataType":"enum","enums":["expired"]},{"dataType":"enum","enums":["open"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "stripe.Stripe.Checkout.Session.PaymentStatus": {
         "dataType": "refAlias",
         "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["no_payment_required"]},{"dataType":"enum","enums":["paid"]},{"dataType":"enum","enums":["unpaid"]}],"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "RepositoryDTO__status-stripe.Stripe.Checkout.Session.Status--payment_status-stripe.Stripe.Checkout.Session.PaymentStatus--customer_email-string__": {
+    "RepositoryDTO__status-open--payment_status_63_-undefined--customer_email_63_-undefined_-or-_status-complete-or-expired--payment_status-stripe.Stripe.Checkout.Session.PaymentStatus--customer_email-string__": {
         "dataType": "refObject",
         "properties": {
             "status": {"dataType":"double","required":true},
             "message": {"dataType":"any","required":true},
-            "data": {"dataType":"nestedObjectLiteral","nestedProperties":{"customer_email":{"dataType":"string","required":true},"payment_status":{"ref":"stripe.Stripe.Checkout.Session.PaymentStatus","required":true},"status":{"ref":"stripe.Stripe.Checkout.Session.Status","required":true}},"required":true},
+            "data": {"dataType":"union","subSchemas":[{"dataType":"nestedObjectLiteral","nestedProperties":{"customer_email":{"dataType":"undefined"},"payment_status":{"dataType":"undefined"},"status":{"dataType":"enum","enums":["open"],"required":true}}},{"dataType":"nestedObjectLiteral","nestedProperties":{"customer_email":{"dataType":"string","required":true},"payment_status":{"ref":"stripe.Stripe.Checkout.Session.PaymentStatus","required":true},"status":{"dataType":"union","subSchemas":[{"dataType":"enum","enums":["complete"]},{"dataType":"enum","enums":["expired"]}],"required":true}}}],"required":true},
         },
         "additionalProperties": false,
     },
@@ -823,6 +818,36 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'deleteMe',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsTicketController_getTickets: Record<string, TsoaRoute.ParameterSchema> = {
+                orderCode: {"in":"path","name":"orderCode","required":true,"dataType":"string"},
+        };
+        app.get('/api/ticket/:orderCode',
+            ...(fetchMiddlewares<RequestHandler>(TicketController)),
+            ...(fetchMiddlewares<RequestHandler>(TicketController.prototype.getTickets)),
+
+            async function TicketController_getTickets(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsTicketController_getTickets, request, response });
+
+                const controller = new TicketController();
+
+              await templateService.apiHandler({
+                methodName: 'getTickets',
                 controller,
                 response,
                 next,
@@ -1637,7 +1662,7 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsReviewController_create: Record<string, TsoaRoute.ParameterSchema> = {
                 req: {"in":"request","name":"req","required":true,"dataType":"object"},
-                data: {"in":"body","name":"data","required":true,"dataType":"any"},
+                data: {"in":"body","name":"data","required":true,"ref":"ReviewModel"},
         };
         app.post('/api/Review',
             authenticateMiddleware([{"JWT":["admin","user"]}]),

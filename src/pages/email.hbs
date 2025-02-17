@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      /* Header */
+      .header {
+        background-color: #f4f4f4;
+        padding: 20px;
+        text-align: center;
+        font-family: Arial, sans-serif;
+      }
+
+      /* Footer */
+      .footer {
+        background-color: #222;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        font-family: Arial, sans-serif;
+      }
+
+      /* Nội dung */
+      .content {
+        margin: 20px;
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+      }
+
+      /* Bảng */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      th, td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f4f4f4;
+        font-weight: bold;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+
+      tr:hover {
+        background-color: #f1f1f1;
+      }
+
+      /* Tiêu đề */
+      h1 {
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Kính gửi: Quý khách {{name}}!</h1>
+    </div>
+
+    <div class="content">
+      <h1>Thông tin vé xem phim</h1>
+      <table>
+        <tbody>
+          <tr>
+            <th scope="row">Mã hóa đơn</th>
+            <td>{{orderCode}}</td>
+          </tr>
+          <tr>
+            <th scope="row">Tên bộ phim</th>
+            <td>{{nameMovie}}</td>
+          </tr>
+          <tr>
+            <th scope="row">Ghế</th>
+            <td>{{seats}}</td>
+          </tr>
+          <tr>
+            <th scope="row">Giờ</th>
+            <td>{{hours}}</td>
+          </tr>
+          <tr>
+            <th scope="row">Tổng tiền</th>
+            <td>{{price}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer">
+      <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
+    </div>
+  </body>
+</html>

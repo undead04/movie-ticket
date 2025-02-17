@@ -82,7 +82,15 @@ export default class BillService extends BaseService<Bill> {
     return data;
   }
   async getBillCode(orderCode: string): Promise<Bill> {
-    return (await this.repository.getBy(orderCode, "orderCode")).getOne();
+    return (await this.repository.getBy(orderCode, "orderCode"))
+      .innerJoinAndSelect("bill.user", "user")
+      .innerJoinAndSelect("bill.tickets", "ticket")
+      .innerJoinAndSelect("ticket.seat", "seat")
+      .innerJoinAndSelect("ticket.showtime", "showtime")
+      .innerJoinAndSelect("showtime.movie", "movie")
+      .innerJoinAndSelect("showtime.screen", "screen")
+      .innerJoinAndSelect("screen.theater", "theater")
+      .getOne();
   }
   async getFilter(filter: BillFilter) {
     const {

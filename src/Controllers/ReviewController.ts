@@ -48,7 +48,7 @@ export class ReviewController extends BaseController<ReviewService> {
   @Security("JWT", ["admin", "user"])
   @Middlewares([validateError(ReviewModel)])
   @SuccessResponse(201, "Create")
-  async create(@Request() req: any, @Body() data) {
+  async create(@Request() req: any, @Body() data: ReviewModel) {
     const user: UserToken = req.user;
     return await super.create({
       ...data,

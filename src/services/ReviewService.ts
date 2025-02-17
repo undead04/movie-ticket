@@ -24,9 +24,9 @@ export default class ReviewService extends BaseService<Review> {
     if (data) {
       return data;
     }
-    throw new CustomError("Phim này không tồn tại", 404);
+    throw new CustomError("Bình luận này không tồn tại", 404);
   }
-  async getFillter(filter: ReviewFilter) {
+  async getFilter(filter: ReviewFilter) {
     const { userId, rating, movieId, orderBy, sort, page, pageSize } = filter;
     const queryBuilder = await (
       await this.repository.createQueryBuilder()
